@@ -1,0 +1,427 @@
+:root {
+  --bg-bark: #2B1E16;
+  --surface-wood: #3E2C20;
+  --border-timber: #5C4332;
+  --moss-green: #4E7A45;
+  --sprout-green: #76A85D;
+  --sapwood-cream: #E8DEC8;
+  --lichen-gray: #A69B8D;
+  --dark-soil: #1C130E;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--dark-soil);
+  color: var(--sapwood-cream);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background-color: var(--bg-bark);
+  border-bottom: 2px solid var(--moss-green);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.leaf-logo {
+  font-size: 28px;
+  background: var(--surface-wood);
+  border: 1px solid var(--moss-green);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.brand h1 {
+  font-size: 1.25rem;
+  color: var(--sprout-green);
+}
+
+.badge {
+  font-size: 0.75rem;
+  background: var(--moss-green);
+  color: var(--sapwood-cream);
+  padding: 2px 8px;
+  border-radius: 12px;
+  vertical-align: middle;
+}
+
+.brand p {
+  font-size: 0.82rem;
+  color: var(--lichen-gray);
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 20px;
+  padding: 20px 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1080px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card {
+  background: var(--bg-bark);
+  border: 1px solid var(--border-timber);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.card h2 {
+  font-size: 0.98rem;
+  color: var(--sprout-green);
+  margin-bottom: 12px;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header-row h2 {
+  margin-bottom: 0;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--lichen-gray);
+}
+
+.dropzone {
+  display: block;
+  border: 2px dashed var(--moss-green);
+  background: var(--surface-wood);
+  border-radius: 8px;
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.dropzone:hover {
+  background: #483325;
+  border-color: var(--sprout-green);
+}
+
+.drop-icon {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.dropzone small {
+  color: var(--lichen-gray);
+  display: block;
+  margin-top: 4px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  color: var(--lichen-gray);
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  background: var(--surface-wood);
+  color: var(--sapwood-cream);
+  border: 1px solid var(--border-timber);
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 0.85rem;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--sprout-green);
+}
+
+.btn {
+  border: 1px solid var(--border-timber);
+  border-radius: 5px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--moss-green);
+  color: var(--sapwood-cream);
+  border-color: var(--sprout-green);
+}
+
+.btn-primary:hover {
+  background: var(--sprout-green);
+  color: var(--dark-soil);
+}
+
+.btn-secondary {
+  background: var(--surface-wood);
+  color: var(--sapwood-cream);
+}
+
+.btn-secondary:hover {
+  border-color: var(--sprout-green);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  background: var(--surface-wood);
+  color: var(--sapwood-cream);
+}
+
+.btn-sm:hover {
+  background: var(--moss-green);
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 290px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.control-item {
+  display: grid;
+  grid-template-columns: 110px 1fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  background: var(--surface-wood);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-timber);
+}
+
+.control-remove {
+  background: transparent;
+  border: none;
+  color: #e07a5f;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.icon-studio {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.icon-preview-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--dark-soil);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-timber);
+}
+
+.icon-preview-box small {
+  font-size: 0.72rem;
+  color: var(--lichen-gray);
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.wpf-stage {
+  background: #140d09;
+  border: 1px solid var(--border-timber);
+  border-radius: 6px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wpf-window {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+  border: 1px solid #5C4332;
+}
+
+.wpf-titlebar {
+  background: #1c130e;
+  color: #A69B8D;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.wpf-body {
+  padding: 16px;
+}
+
+.wpf-banner {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  border-bottom: 3px solid #4E7A45;
+}
+
+.wpf-header-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.wpf-header-sub {
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.wpf-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wpf-field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.wpf-input {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+.wpf-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  padding: 4px 0;
+}
+
+.wpf-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.wpf-btn {
+  padding: 7px 14px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.tabs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.tab-btn {
+  background: var(--surface-wood);
+  color: var(--lichen-gray);
+  border: 1px solid var(--border-timber);
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.tab-btn.active {
+  background: var(--moss-green);
+  color: var(--sapwood-cream);
+  border-color: var(--sprout-green);
+}
+
+.tab-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.code-viewer {
+  background: #140e0a;
+  border: 1px solid var(--border-timber);
+  border-radius: 6px;
+  padding: 12px;
+  max-height: 360px;
+  overflow: auto;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.78rem;
+  color: var(--sapwood-cream);
+  white-space: pre;
+}
