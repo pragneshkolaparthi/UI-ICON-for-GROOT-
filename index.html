@@ -3,228 +3,104 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#1e130c" />
-  <title>PyRevit UI & Icon Studio — Groot Palette</title>
+  <title>pyRevit Groot UI & Icon Generator</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-  <div class="direct-download-bar">
-    <div class="bar-group">
-      <span class="bar-label">Website Files (GitHub):</span>
-      <button type="button" class="dl-chip" id="dlSiteHtml">↓ index.html</button>
-      <button type="button" class="dl-chip" id="dlSiteCss">↓ style.css</button>
-      <button type="button" class="dl-chip" id="dlSiteJs">↓ app.js</button>
-      <button type="button" class="dl-chip accent" id="dlSiteZip">📦 All Website Files (.ZIP)</button>
-    </div>
-    <div class="bar-group">
-      <span class="bar-label">pyRevit Output Files:</span>
-      <button type="button" class="dl-chip" id="dlToolXaml">↓ ui.xaml</button>
-      <button type="button" class="dl-chip" id="dlToolPy">↓ script.py</button>
-      <button type="button" class="dl-chip" id="dlToolIcon">↓ icon.png</button>
-      <button type="button" class="dl-chip primary" id="dlToolBundle">⬇ .pushbutton.zip</button>
-    </div>
+  <!-- Direct Download Bar for GitHub Hosting Files -->
+  <div class="site-files-bar">
+    <span>GitHub Website Files:</span>
+    <button type="button" id="dlHtmlBtn">↓ index.html</button>
+    <button type="button" id="dlCssBtn">↓ style.css</button>
+    <button type="button" id="dlJsBtn">↓ app.js</button>
   </div>
 
   <div class="shell">
     <header>
-      <div class="brand">
-        <div class="brandmark">P</div>
-        <div>
-          PyRevit UI &amp; Icon Studio
-          <small>Script &rarr; Groot-Coloured WPF UI + 96&times;96 Operation Icon</small>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button class="secondary" id="loadSampleBtn" type="button">Load Sample Script</button>
-        <div class="local-pill">● Browser-only processing</div>
-      </div>
+      <h1>pyRevit Groot UI &amp; Icon Generator</h1>
+      <p>Upload your <code>script.py</code> &rarr; Download working Groot UI files &amp; 96&times;96 icon</p>
     </header>
 
-    <section class="hero">
-      <div class="eyebrow">A studio for your pyRevit tools</div>
-      <h1>Upload your script.<br><span>Download UI files &amp; 96&times;96 icon.</span></h1>
-      <p>Upload a Python script. The script's actual Revit operation becomes the 96&times;96 hero artwork and generates matching WPF controls. Groot influences colour only—dark bark (<code>#3B261A</code>), bark brown (<code>#8B5A35</code>), warm wood (<code>#D2A16B</code>), and leaf green (<code>#6F9E4D</code>)—with no character or plant artwork.</p>
-    </section>
-
-    <main class="workspace">
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Build your UI &amp; icon</h2>
-          <span class="step">01 / Upload &amp; customise</span>
+    <main class="two-windows">
+      <!-- WINDOW 1: UPLOAD WINDOW -->
+      <section class="window-card">
+        <div class="window-head">
+          <h2>1. Upload Window</h2>
+          <span>script.py</span>
         </div>
-        <div class="panel-body">
-          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Choose a Python script">
+        <div class="window-body">
+          <div class="dropzone" id="dropzone" role="button" tabindex="0">
             <div class="upload-icon">
-              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 16V4m-5 5 5-5 5 5"/>
+                <path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/>
+              </svg>
             </div>
-            <strong>Drop your pyRevit script here</strong>
-            <p>or <span class="browse">browse files</span> to choose a .py file</p>
-            <p class="drop-note">Python script &middot; up to 2 MB</p>
+            <strong id="dropTitle">Drop your pyRevit script.py here</strong>
+            <p id="dropSub">or <span class="browse">click to browse</span> from your computer</p>
           </div>
           <input id="fileInput" type="file" accept=".py,text/x-python,text/plain" />
 
-          <div class="filebar" id="filebar">
-            <div class="filemeta">
-              <div class="filename" id="filename">script.py</div>
-              <div class="filesize" id="filesize"></div>
+          <div class="status-box" id="statusBox">
+            <div class="status-row">
+              <span class="status-label">Uploaded Script:</span>
+              <strong id="fileNameText">None</strong>
             </div>
-            <button class="text-btn" id="removeFile" type="button">Remove</button>
-          </div>
-
-          <div class="analysis" id="analysis">
-            <h3>What your script appears to do</h3>
-            <div class="detected">
-              <div class="detected-title"><span id="detectIcon">↳</span><span id="detectedTitle">General Revit Tool</span></div>
-              <p id="detectedSummary">A general-purpose pyRevit utility.</p>
-              <div class="keywords" id="keywords"></div>
+            <div class="status-row">
+              <span class="status-label">Detected Operation:</span>
+              <strong id="detectedOpText">Waiting for file...</strong>
             </div>
-            <div class="workflow-card" aria-live="polite">
-              <div class="workflow-heading">Main icon: script-specific Revit operation</div>
-              <div class="workflow-steps" id="workflowSteps">
-                <div class="workflow-step"><span>01</span><b>Select</b></div>
-                <i>&rarr;</i>
-                <div class="workflow-step"><span>02</span><b>Process</b></div>
-                <i>&rarr;</i>
-                <div class="workflow-step"><span>03</span><b>Result</b></div>
-              </div>
-              <p class="workflow-note" id="workflowNote">The icon depicts the operation inferred from the script's Revit API calls and keywords.</p>
+            <div class="status-row">
+              <span class="status-label">Detected Inputs:</span>
+              <strong id="detectedInputsText">Auto-launch confirmation dialog</strong>
             </div>
           </div>
-
-          <div class="section-label"><span>Customise tool &amp; button icon</span></div>
-          <div class="controls">
-            <div class="field">
-              <label for="labelInput">Button &amp; Window Title</label>
-              <input id="labelInput" type="text" maxlength="28" value="Sheet View Transfer" />
-            </div>
-            <div class="field">
-              <label for="bundleInput">Bundle Folder Name</label>
-              <input id="bundleInput" type="text" value="SheetViewTransfer.pushbutton" />
-            </div>
-            <div class="field full">
-              <label for="subtitleInput">WPF Header Subtitle</label>
-              <input id="subtitleInput" type="text" value="Transfers or copies views and sheets between documentation sets." />
-            </div>
-            <div class="field">
-              <label for="category">Icon symbol</label>
-              <select id="category">
-                <option value="auto">Auto-detect from script</option>
-                <option value="transfer">View / Sheet Transfer</option>
-                <option value="views">Views / Viewports</option>
-                <option value="sheets">Sheets / Drawing Sheets</option>
-                <option value="walls">Walls / Elements</option>
-                <option value="stairs">Stairs / Paths</option>
-                <option value="schedule">Schedules / Tables</option>
-                <option value="clash">Clash Detection</option>
-                <option value="export">Export / Output</option>
-                <option value="import">Import / Input</option>
-                <option value="door">Doors</option>
-                <option value="window">Windows</option>
-                <option value="tag">Tags / Annotations</option>
-                <option value="dimension">Dimensions</option>
-                <option value="level">Levels</option>
-                <option value="family">Families</option>
-                <option value="model">3D Model</option>
-                <option value="gear">General Utility</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="style">Creative treatment</label>
-              <select id="style">
-                <option value="isometric">Isometric hero</option>
-                <option value="blueprint">Blueprint luxe</option>
-                <option value="embossed">Sculpted 3D</option>
-                <option value="exploded">Exploded axonometric</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Groot-inspired colour palette only</label>
-              <input type="hidden" id="color" value="#6F9E4D" />
-              <div class="swatches" id="swatches">
-                <button class="swatch" type="button" data-color="#3B261A" style="background:#3B261A" title="Dark bark (#3B261A)"></button>
-                <button class="swatch" type="button" data-color="#8B5A35" style="background:#8B5A35" title="Bark brown (#8B5A35)"></button>
-                <button class="swatch" type="button" data-color="#D2A16B" style="background:#D2A16B" title="Warm wood (#D2A16B)"></button>
-                <button class="swatch active" type="button" data-color="#6F9E4D" style="background:#6F9E4D" title="Leaf green (#6F9E4D)"></button>
-              </div>
-            </div>
-            <div class="field">
-              <label for="runBtnInput">Run Button Label</label>
-              <input id="runBtnInput" type="text" value="Run Revit Tool" />
-            </div>
-          </div>
-
-          <div class="section-label">
-            <span>WPF Window Input Controls (<code>ui.xaml</code>)</span>
-            <button class="secondary btn-sm" id="addCtrlBtn" type="button">+ Add Control</button>
-          </div>
-          <div class="ctrl-list" id="ctrlList"></div>
         </div>
       </section>
 
-      <aside class="right-panel">
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Live Icon &amp; WPF Preview</h2>
-            <span class="step">02 / Export</span>
-          </div>
-          <div class="preview-area">
-            <div class="preview-split">
-              <div class="icon-card">
-                <div class="icon-frame">
-                  <canvas id="iconCanvas" width="96" height="96" aria-label="96 by 96 pixel icon preview"></canvas>
-                </div>
-                <div class="preview-name" id="previewName">Sheet View Transfer</div>
-                <div class="preview-sub" id="previewSub">96 &times; 96 px icon.png</div>
-              </div>
+      <!-- WINDOW 2: DOWNLOAD WINDOW -->
+      <section class="window-card">
+        <div class="window-head">
+          <h2>2. Download Window</h2>
+          <span>Ready for .pushbutton folder</span>
+        </div>
+        <div class="window-body">
+          <div class="preview-strip">
+            <div class="icon-holder">
+              <canvas id="iconCanvas" width="96" height="96"></canvas>
+              <span>icon.png (96&times;96)</span>
+            </div>
 
-              <div class="wpf-mock">
-                <div class="wpf-titlebar">
-                  <span id="wpfTitleBar">Sheet View Transfer</span>
-                  <span>&times;</span>
-                </div>
-                <div class="wpf-body">
-                  <div class="wpf-banner" id="wpfBanner">
-                    <div class="wpf-banner-title" id="wpfHeader">SHEET VIEW TRANSFER</div>
-                    <div class="wpf-banner-sub" id="wpfSub">Transfers or copies views and sheets</div>
-                  </div>
-                  <div class="wpf-fields" id="wpfFields"></div>
-                  <div class="wpf-footer">
-                    <button class="wpf-btn cancel" type="button">Cancel</button>
-                    <button class="wpf-btn run" id="wpfRunBtn" type="button">Run Revit Tool</button>
-                  </div>
+            <div class="ui-mini-preview">
+              <div class="ui-mini-titlebar" id="previewWindowTitle">Revit Tool</div>
+              <div class="ui-mini-body">
+                <div class="ui-mini-banner" id="previewBannerText">Ready to run operation</div>
+                <div class="ui-mini-controls" id="previewControlsInfo">Preserves original ribbon name &amp; transactions</div>
+                <div class="ui-mini-btns">
+                  <span class="mini-cancel">Cancel</span>
+                  <span class="mini-run">Run</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="actions">
-            <button class="primary" id="downloadBundleBtn" type="button">⬇ Download Complete .pushbutton.zip (ui.xaml + script.py + icon.png)</button>
-            <div class="action-row">
-              <button class="secondary" id="downloadIconBtn" type="button">↓ icon.png (96&times;96)</button>
-              <button class="secondary" id="downloadXamlBtn" type="button">↓ ui.xaml</button>
-              <button class="secondary" id="downloadPyBtn" type="button">↓ script.py</button>
+          <div class="download-buttons">
+            <button class="btn-main" id="dlZipBtn" type="button" disabled>
+              ⬇ Download All Files (.ZIP)
+            </button>
+            <div class="btn-grid">
+              <button class="btn-sub" id="dlPyBtn" type="button" disabled>↓ script.py</button>
+              <button class="btn-sub" id="dlXamlBtn" type="button" disabled>↓ ui.xaml</button>
+              <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ icon.png</button>
             </div>
           </div>
-        </section>
-
-        <section class="panel code-panel">
-          <div class="panel-head">
-            <div class="tab-group">
-              <button class="tab-btn active" data-tab="xaml" type="button">ui.xaml</button>
-              <button class="tab-btn" data-tab="python" type="button">script.py (Wired)</button>
-            </div>
-            <button class="secondary btn-sm" id="copyCodeBtn" type="button">Copy Code</button>
-          </div>
-          <div class="panel-body">
-            <pre class="code-view"><code id="codeOutput"></code></pre>
-          </div>
-        </section>
-      </aside>
+          <p class="helper-note">Drop the downloaded <code>script.py</code>, <code>ui.xaml</code>, and <code>icon.png</code> directly into your existing <code>.pushbutton</code> folder, then reload pyRevit.</p>
+        </div>
+      </section>
     </main>
   </div>
 
-  <div class="toast" id="toast">File downloaded</div>
   <script src="app.js"></script>
 </body>
 </html>
