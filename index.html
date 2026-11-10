@@ -1,166 +1,230 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Groot UI Studio for pyRevit</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1e130c" />
+  <title>PyRevit UI & Icon Studio — Groot Palette</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="leaf-logo">🌱</span>
-      <div>
-        <h1>Groot UI Studio <span class="badge">for pyRevit</span></h1>
-        <p>Upload your <code>script.py</code> &rarr; Generate WPF <code>ui.xaml</code>, wired <code>script.py</code> &amp; <code>icon.png</code></p>
-      </div>
+  <div class="direct-download-bar">
+    <div class="bar-group">
+      <span class="bar-label">Website Files (GitHub):</span>
+      <button type="button" class="dl-chip" id="dlSiteHtml">↓ index.html</button>
+      <button type="button" class="dl-chip" id="dlSiteCss">↓ style.css</button>
+      <button type="button" class="dl-chip" id="dlSiteJs">↓ app.js</button>
+      <button type="button" class="dl-chip accent" id="dlSiteZip">📦 All Website Files (.ZIP)</button>
     </div>
-    <div class="top-actions">
-      <button id="loadSampleBtn" class="btn btn-secondary">Load Sample Script</button>
-      <button id="downloadZipBtn" class="btn btn-primary">⬇ Download .pushbutton.zip</button>
+    <div class="bar-group">
+      <span class="bar-label">pyRevit Output Files:</span>
+      <button type="button" class="dl-chip" id="dlToolXaml">↓ ui.xaml</button>
+      <button type="button" class="dl-chip" id="dlToolPy">↓ script.py</button>
+      <button type="button" class="dl-chip" id="dlToolIcon">↓ icon.png</button>
+      <button type="button" class="dl-chip primary" id="dlToolBundle">⬇ .pushbutton.zip</button>
     </div>
-  </header>
+  </div>
 
-  <main class="workspace">
-    <section class="panel config-panel">
-      <div class="card">
-        <h2>1. Upload Tool Script (<code>script.py</code>)</h2>
-        <label class="dropzone" id="dropzone">
-          <input type="file" id="scriptUpload" accept=".py" hidden />
-          <div class="dropzone-content">
-            <span class="drop-icon">📂</span>
-            <p id="uploadStatus"><strong>Click to upload <code>script.py</code></strong> or drag &amp; drop here</p>
-            <small>Automatically detects <code>__title__</code>, <code>__doc__</code>, and top-level parameters</small>
-          </div>
-        </label>
-      </div>
-
-      <div class="card">
-        <h2>2. Tool &amp; Groot Theme Settings</h2>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Bundle Folder Name</label>
-            <input type="text" id="bundleName" value="GrootTool.pushbutton" />
-          </div>
-          <div class="form-group">
-            <label>Groot Color Palette</label>
-            <select id="themeSelect">
-              <option value="classic">Classic Groot Moss (#2B1E16 / #4E7A45)</option>
-              <option value="spore">Bioluminescent Spore (#1F1916 / #52B788)</option>
-              <option value="autumn">Autumn Bark &amp; Amber (#2D1B12 / #C87D32)</option>
-              <option value="deepwood">Ancient Deepwood (#19221B / #6A994E)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>WPF Window Title</label>
-            <input type="text" id="windowTitle" value="GROOT AUTOMATION" />
-          </div>
-          <div class="form-group">
-            <label>Subtitle / Description</label>
-            <input type="text" id="windowSubtitle" value="Configure parameters and execute Revit task" />
-          </div>
-          <div class="form-group">
-            <label>Run Button Text</label>
-            <input type="text" id="runBtnText" value="I am Groot (Run)" />
-          </div>
-          <div class="form-group">
-            <label>Window Width (px)</label>
-            <input type="number" id="windowWidth" value="420" min="320" max="800" />
-          </div>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <div class="brandmark">P</div>
+        <div>
+          PyRevit UI &amp; Icon Studio
+          <small>Script &rarr; Groot-Coloured WPF UI + 96&times;96 Operation Icon</small>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-header-row">
-          <h2>3. WPF Input Controls</h2>
-          <button id="addControlBtn" class="btn btn-sm">+ Add Control</button>
-        </div>
-        <div id="controlsList" class="controls-list"></div>
+      <div class="header-actions">
+        <button class="secondary" id="loadSampleBtn" type="button">Load Sample Script</button>
+        <div class="local-pill">● Browser-only processing</div>
       </div>
+    </header>
 
-      <div class="card">
-        <h2>4. pyRevit Ribbon Icon (<code>icon.png</code>)</h2>
-        <div class="icon-studio">
-          <div class="icon-preview-box">
-            <canvas id="iconCanvas" width="96" height="96"></canvas>
-            <small>96 &times; 96 px PNG</small>
-          </div>
-          <div class="form-grid flex-1">
-            <div class="form-group">
-              <label>Icon Symbol</label>
-              <select id="iconSymbol">
-                <option value="sprout">🌱 Groot Sprout</option>
-                <option value="sheets">📄 Views &amp; Sheets</option>
-                <option value="tag">🏷️ Element Tagger</option>
-                <option value="gear">⚙️ BIM Automation</option>
-                <option value="tree">🌳 Root Structure</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Badge Text (Max 4 chars)</label>
-              <input type="text" id="iconBadge" value="GRT" maxlength="4" />
-            </div>
-            <div class="form-group">
-              <label>Corner Leaf Accent</label>
-              <select id="iconLeaf">
-                <option value="yes">Show Moss Leaf</option>
-                <option value="no">Hide Leaf</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Download Icon Only</label>
-              <button id="downloadIconBtn" class="btn btn-secondary btn-full">Download icon.png</button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <section class="hero">
+      <div class="eyebrow">A studio for your pyRevit tools</div>
+      <h1>Upload your script.<br><span>Download UI files &amp; 96&times;96 icon.</span></h1>
+      <p>Upload a Python script. The script's actual Revit operation becomes the 96&times;96 hero artwork and generates matching WPF controls. Groot influences colour only—dark bark (<code>#3B261A</code>), bark brown (<code>#8B5A35</code>), warm wood (<code>#D2A16B</code>), and leaf green (<code>#6F9E4D</code>)—with no character or plant artwork.</p>
     </section>
 
-    <section class="panel preview-panel">
-      <div class="card">
-        <div class="card-header-row">
-          <h2>Live pyRevit WPF Window Preview</h2>
-          <span class="hint">Interactive preview</span>
+    <main class="workspace">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Build your UI &amp; icon</h2>
+          <span class="step">01 / Upload &amp; customise</span>
         </div>
-        <div class="wpf-stage">
-          <div id="wpfWindow" class="wpf-window">
-            <div class="wpf-titlebar">
-              <span id="previewTitleBar">Groot Tool</span>
-              <span class="wpf-close">&times;</span>
+        <div class="panel-body">
+          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Choose a Python script">
+            <div class="upload-icon">
+              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/></svg>
             </div>
-            <div class="wpf-body">
-              <div id="previewBanner" class="wpf-banner">
-                <div id="previewHeader" class="wpf-header-title">GROOT AUTOMATION</div>
-                <div id="previewSubheader" class="wpf-header-sub">Configure parameters and execute Revit task</div>
+            <strong>Drop your pyRevit script here</strong>
+            <p>or <span class="browse">browse files</span> to choose a .py file</p>
+            <p class="drop-note">Python script &middot; up to 2 MB</p>
+          </div>
+          <input id="fileInput" type="file" accept=".py,text/x-python,text/plain" />
+
+          <div class="filebar" id="filebar">
+            <div class="filemeta">
+              <div class="filename" id="filename">script.py</div>
+              <div class="filesize" id="filesize"></div>
+            </div>
+            <button class="text-btn" id="removeFile" type="button">Remove</button>
+          </div>
+
+          <div class="analysis" id="analysis">
+            <h3>What your script appears to do</h3>
+            <div class="detected">
+              <div class="detected-title"><span id="detectIcon">↳</span><span id="detectedTitle">General Revit Tool</span></div>
+              <p id="detectedSummary">A general-purpose pyRevit utility.</p>
+              <div class="keywords" id="keywords"></div>
+            </div>
+            <div class="workflow-card" aria-live="polite">
+              <div class="workflow-heading">Main icon: script-specific Revit operation</div>
+              <div class="workflow-steps" id="workflowSteps">
+                <div class="workflow-step"><span>01</span><b>Select</b></div>
+                <i>&rarr;</i>
+                <div class="workflow-step"><span>02</span><b>Process</b></div>
+                <i>&rarr;</i>
+                <div class="workflow-step"><span>03</span><b>Result</b></div>
               </div>
-              <div id="previewControls" class="wpf-controls"></div>
-              <div class="wpf-footer">
-                <button class="wpf-btn wpf-btn-cancel" type="button">Cancel</button>
-                <button id="previewRunBtn" class="wpf-btn wpf-btn-run" type="button">I am Groot (Run)</button>
+              <p class="workflow-note" id="workflowNote">The icon depicts the operation inferred from the script's Revit API calls and keywords.</p>
+            </div>
+          </div>
+
+          <div class="section-label"><span>Customise tool &amp; button icon</span></div>
+          <div class="controls">
+            <div class="field">
+              <label for="labelInput">Button &amp; Window Title</label>
+              <input id="labelInput" type="text" maxlength="28" value="Sheet View Transfer" />
+            </div>
+            <div class="field">
+              <label for="bundleInput">Bundle Folder Name</label>
+              <input id="bundleInput" type="text" value="SheetViewTransfer.pushbutton" />
+            </div>
+            <div class="field full">
+              <label for="subtitleInput">WPF Header Subtitle</label>
+              <input id="subtitleInput" type="text" value="Transfers or copies views and sheets between documentation sets." />
+            </div>
+            <div class="field">
+              <label for="category">Icon symbol</label>
+              <select id="category">
+                <option value="auto">Auto-detect from script</option>
+                <option value="transfer">View / Sheet Transfer</option>
+                <option value="views">Views / Viewports</option>
+                <option value="sheets">Sheets / Drawing Sheets</option>
+                <option value="walls">Walls / Elements</option>
+                <option value="stairs">Stairs / Paths</option>
+                <option value="schedule">Schedules / Tables</option>
+                <option value="clash">Clash Detection</option>
+                <option value="export">Export / Output</option>
+                <option value="import">Import / Input</option>
+                <option value="door">Doors</option>
+                <option value="window">Windows</option>
+                <option value="tag">Tags / Annotations</option>
+                <option value="dimension">Dimensions</option>
+                <option value="level">Levels</option>
+                <option value="family">Families</option>
+                <option value="model">3D Model</option>
+                <option value="gear">General Utility</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="style">Creative treatment</label>
+              <select id="style">
+                <option value="isometric">Isometric hero</option>
+                <option value="blueprint">Blueprint luxe</option>
+                <option value="embossed">Sculpted 3D</option>
+                <option value="exploded">Exploded axonometric</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Groot-inspired colour palette only</label>
+              <input type="hidden" id="color" value="#6F9E4D" />
+              <div class="swatches" id="swatches">
+                <button class="swatch" type="button" data-color="#3B261A" style="background:#3B261A" title="Dark bark (#3B261A)"></button>
+                <button class="swatch" type="button" data-color="#8B5A35" style="background:#8B5A35" title="Bark brown (#8B5A35)"></button>
+                <button class="swatch" type="button" data-color="#D2A16B" style="background:#D2A16B" title="Warm wood (#D2A16B)"></button>
+                <button class="swatch active" type="button" data-color="#6F9E4D" style="background:#6F9E4D" title="Leaf green (#6F9E4D)"></button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="runBtnInput">Run Button Label</label>
+              <input id="runBtnInput" type="text" value="Run Revit Tool" />
+            </div>
+          </div>
+
+          <div class="section-label">
+            <span>WPF Window Input Controls (<code>ui.xaml</code>)</span>
+            <button class="secondary btn-sm" id="addCtrlBtn" type="button">+ Add Control</button>
+          </div>
+          <div class="ctrl-list" id="ctrlList"></div>
+        </div>
+      </section>
+
+      <aside class="right-panel">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Live Icon &amp; WPF Preview</h2>
+            <span class="step">02 / Export</span>
+          </div>
+          <div class="preview-area">
+            <div class="preview-split">
+              <div class="icon-card">
+                <div class="icon-frame">
+                  <canvas id="iconCanvas" width="96" height="96" aria-label="96 by 96 pixel icon preview"></canvas>
+                </div>
+                <div class="preview-name" id="previewName">Sheet View Transfer</div>
+                <div class="preview-sub" id="previewSub">96 &times; 96 px icon.png</div>
+              </div>
+
+              <div class="wpf-mock">
+                <div class="wpf-titlebar">
+                  <span id="wpfTitleBar">Sheet View Transfer</span>
+                  <span>&times;</span>
+                </div>
+                <div class="wpf-body">
+                  <div class="wpf-banner" id="wpfBanner">
+                    <div class="wpf-banner-title" id="wpfHeader">SHEET VIEW TRANSFER</div>
+                    <div class="wpf-banner-sub" id="wpfSub">Transfers or copies views and sheets</div>
+                  </div>
+                  <div class="wpf-fields" id="wpfFields"></div>
+                  <div class="wpf-footer">
+                    <button class="wpf-btn cancel" type="button">Cancel</button>
+                    <button class="wpf-btn run" id="wpfRunBtn" type="button">Run Revit Tool</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="card code-card">
-        <div class="tabs-header">
-          <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="xaml">ui.xaml</button>
-            <button class="tab-btn" data-tab="python">script.py (Wired)</button>
+          <div class="actions">
+            <button class="primary" id="downloadBundleBtn" type="button">⬇ Download Complete .pushbutton.zip (ui.xaml + script.py + icon.png)</button>
+            <div class="action-row">
+              <button class="secondary" id="downloadIconBtn" type="button">↓ icon.png (96&times;96)</button>
+              <button class="secondary" id="downloadXamlBtn" type="button">↓ ui.xaml</button>
+              <button class="secondary" id="downloadPyBtn" type="button">↓ script.py</button>
+            </div>
           </div>
-          <div class="tab-actions">
-            <button id="copyCodeBtn" class="btn btn-sm">Copy Code</button>
-            <button id="downloadXamlBtn" class="btn btn-sm">Download ui.xaml</button>
-            <button id="downloadPyBtn" class="btn btn-sm">Download script.py</button>
-          </div>
-        </div>
-        <pre class="code-viewer"><code id="codeOutput"></code></pre>
-      </div>
-    </section>
-  </main>
+        </section>
 
+        <section class="panel code-panel">
+          <div class="panel-head">
+            <div class="tab-group">
+              <button class="tab-btn active" data-tab="xaml" type="button">ui.xaml</button>
+              <button class="tab-btn" data-tab="python" type="button">script.py (Wired)</button>
+            </div>
+            <button class="secondary btn-sm" id="copyCodeBtn" type="button">Copy Code</button>
+          </div>
+          <div class="panel-body">
+            <pre class="code-view"><code id="codeOutput"></code></pre>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">File downloaded</div>
   <script src="app.js"></script>
 </body>
 </html>
