@@ -1,475 +1,745 @@
-const PALETTES = {
-  classic: {
-    bg: "#2B1E16",
-    surface: "#3E2C20",
-    border: "#5C4332",
-    accent: "#4E7A45",
-    hover: "#76A85D",
-    text: "#E8DEC8",
-    muted: "#A69B8D"
-  },
-  spore: {
-    bg: "#1F1916",
-    surface: "#2D241E",
-    border: "#4A3B32",
-    accent: "#2D6A4F",
-    hover: "#52B788",
-    text: "#E9F5EC",
-    muted: "#95B8A6"
-  },
-  autumn: {
-    bg: "#2D1B12",
-    surface: "#40271A",
-    border: "#633D29",
-    accent: "#9C5A25",
-    hover: "#D98A3C",
-    text: "#F4E3D3",
-    muted: "#B89A82"
-  },
-  deepwood: {
-    bg: "#19221B",
-    surface: "#243127",
-    border: "#3A4E3E",
-    accent: "#4A7840",
-    hover: "#80B968",
-    text: "#E2ECE4",
-    muted: "#98B09C"
-  }
-};
-
-let state = {
-  activeTab: "xaml",
-  uploadedBody: "# Execute your Revit API logic inside this transaction\n        pass",
-  controls: [
-    { type: "TextBox", name: "prefix_tb", label: "Sheet Prefix Filter", defaultVal: "GRT-" },
-    { type: "ComboBox", name: "discipline_cb", label: "Target Discipline", defaultVal: "Architectural,Structural,MEP" },
-    { type: "CheckBox", name: "purge_cb", label: "Purge unused bark and vine families", defaultVal: "True" },
-    { type: "CheckBox", name: "lock_cb", label: "Lock structural roots workset", defaultVal: "False" }
-  ]
-};
-
-const bundleNameInput = document.getElementById("bundleName");
-const themeSelect = document.getElementById("themeSelect");
-const windowTitleInput = document.getElementById("windowTitle");
-const windowSubtitleInput = document.getElementById("windowSubtitle");
-const runBtnTextInput = document.getElementById("runBtnText");
-const windowWidthInput = document.getElementById("windowWidth");
-const controlsListEl = document.getElementById("controlsList");
-const codeOutputEl = document.getElementById("codeOutput");
-const iconCanvas = document.getElementById("iconCanvas");
-const iconSymbolSelect = document.getElementById("iconSymbol");
-const iconBadgeInput = document.getElementById("iconBadge");
-const iconLeafSelect = document.getElementById("iconLeaf");
-
-function init() {
-  renderControlRows();
-  updateAll();
-
-  [bundleNameInput, themeSelect, windowTitleInput, windowSubtitleInput, runBtnTextInput, windowWidthInput].forEach(el => {
-    el.addEventListener("input", updateAll);
-  });
-
-  [iconSymbolSelect, iconBadgeInput, iconLeafSelect].forEach(el => {
-    el.addEventListener("input", drawIcon);
-  });
-
-  document.getElementById("addControlBtn").addEventListener("click", () => {
-    state.controls.push({
-      type: "TextBox",
-      name: "param_" + (state.controls.length + 1) + "_tb",
-      label: "New Parameter",
-      defaultVal: ""
-    });
-    renderControlRows();
-    updateAll();
-  });
-
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      state.activeTab = btn.dataset.tab;
-      updateCodeView();
-    });
-  });
-
-  const scriptUpload = document.getElementById("scriptUpload");
-  scriptUpload.addEventListener("change", e => {
-    if (e.target.files.length) parseUploadedScript(e.target.files[0]);
-  });
-
-  const dropzone = document.getElementById("dropzone");
-  dropzone.addEventListener("dragover", e => e.preventDefault());
-  dropzone.addEventListener("drop", e => {
-    e.preventDefault();
-    if (e.dataTransfer.files.length) parseUploadedScript(e.dataTransfer.files[0]);
-  });
-
-  document.getElementById("loadSampleBtn").addEventListener("click", loadSampleScript);
-
-  document.getElementById("copyCodeBtn").addEventListener("click", () => {
-    navigator.clipboard.writeText(codeOutputEl.textContent);
-    const btn = document.getElementById("copyCodeBtn");
-    btn.textContent = "Copied!";
-    setTimeout(() => (btn.textContent = "Copy Code"), 1500);
-  });
-
-  document.getElementById("downloadXamlBtn").addEventListener("click", () => {
-    downloadTextFile("ui.xaml", generateXaml());
-  });
-
-  document.getElementById("downloadPyBtn").addEventListener("click", () => {
-    downloadTextFile("script.py", generatePython());
-  });
-
-  document.getElementById("downloadIconBtn").addEventListener("click", () => {
-    const link = document.createElement("a");
-    link.download = "icon.png";
-    link.href = iconCanvas.toDataURL("image/png");
-    link.click();
-  });
-
-  document.getElementById("downloadZipBtn").addEventListener("click", downloadBundleZip);
+:root {
+  --bg: #120b07;
+  --panel: #1f140d;
+  --panel2: #2a1b12;
+  --line: #4b3120;
+  --muted: #b59b82;
+  --text: #f5e6d3;
+  --dark-bark: #3B261A;
+  --bark-brown: #8B5A35;
+  --warm-wood: #D2A16B;
+  --leaf-green: #6F9E4D;
+  --leaf-bright: #9ce57f;
+  --cream: #F0D2A6;
 }
 
-function parseUploadedScript(file) {
-  const reader = new FileReader();
-  reader.onload = e => applyScriptParsing(file.name, e.target.result);
-  reader.readAsText(file);
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 12% 0%, #3b261a 0, transparent 38%),
+    linear-gradient(145deg, #100a06, #1c110b 62%, #120b07);
+  color: var(--text);
+  font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
 }
 
-function applyScriptParsing(filename, content) {
-  document.getElementById("uploadStatus").innerHTML = "Loaded <strong>" + filename + "</strong>";
-  const cleanName = filename.replace(/\.py$/i, "");
-  if (cleanName && cleanName !== "script") {
-    bundleNameInput.value = cleanName + ".pushbutton";
-  }
-
-  const titleMatch = content.match(/__title__\s*=\s*["']([^"']+)["']/);
-  if (titleMatch) windowTitleInput.value = titleMatch[1].replace(/\\n/g, " ").toUpperCase();
-
-  const docMatch = content.match(/__doc__\s*=\s*["']([^"']+)["']/);
-  if (docMatch) windowSubtitleInput.value = docMatch[1];
-
-  const detectedControls = [];
-  const lines = content.split(/\r?\n/);
-  const bodyLines = [];
-
-  lines.forEach(line => {
-    const assignMatch = line.match(/^([A-Z_][A-Z0-9_]*)\s*=\s*(.+)$/);
-    if (assignMatch && !assignMatch[1].startsWith("__")) {
-      const varName = assignMatch[1].toLowerCase();
-      const rawVal = assignMatch[2].trim();
-      const label = varName.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-
-      if (/^(True|False)$/i.test(rawVal)) {
-        detectedControls.push({ type: "CheckBox", name: varName + "_cb", label: label, defaultVal: rawVal });
-      } else if (rawVal.startsWith("[") && rawVal.endsWith("]")) {
-        const listItems = rawVal.slice(1, -1).split(",").map(s => s.trim().replace(/^["']|["']$/g, "")).filter(Boolean).join(",");
-        detectedControls.push({ type: "ComboBox", name: varName + "_cmb", label: label, defaultVal: listItems || "Option 1,Option 2" });
-      } else {
-        const strVal = rawVal.replace(/^["']|["']$/g, "");
-        detectedControls.push({ type: "TextBox", name: varName + "_tb", label: label, defaultVal: strVal });
-      }
-    } else if (!line.startsWith("__title__") && !line.startsWith("__doc__") && !line.startsWith("# -*-")) {
-      bodyLines.push("        " + line);
-    }
-  });
-
-  if (detectedControls.length > 0) {
-    state.controls = detectedControls;
-    renderControlRows();
-  }
-
-  const trimmedBody = bodyLines.join("\n").trim();
-  if (trimmedBody) state.uploadedBody = "        " + trimmedBody;
-  updateAll();
+.direct-download-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #180f0a;
+  border-bottom: 2px solid var(--leaf-green);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  box-shadow: 0 8px 24px #00000080;
 }
 
-function loadSampleScript() {
-  const samplePy = '# -*- coding: utf-8 -*-\n__title__ = "Groot Sheet\\nBuilder"\n__doc__ = "Batch creates architectural sheets and transfers view templates"\n\nSHEET_PREFIX = "GRT-A10"\nDISCIPLINE = ["Architectural", "Structural", "Site"]\nCOPY_VIEW_TEMPLATES = True\nLOCK_ROOT_WORKSET = False\n\nprint("Creating sheets with prefix:", ui.sheet_prefix_tb_val)\n';
-  applyScriptParsing("GrootSheetBuilder.py", samplePy);
+.bar-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
 }
 
-function renderControlRows() {
-  controlsListEl.innerHTML = "";
-  state.controls.forEach((ctrl, idx) => {
-    const row = document.createElement("div");
-    row.className = "control-item";
-    row.innerHTML = `
-      <select data-idx="${idx}" data-field="type">
-        <option value="TextBox" ${ctrl.type === "TextBox" ? "selected" : ""}>TextBox</option>
-        <option value="CheckBox" ${ctrl.type === "CheckBox" ? "selected" : ""}>CheckBox</option>
-        <option value="ComboBox" ${ctrl.type === "ComboBox" ? "selected" : ""}>ComboBox</option>
-      </select>
-      <input type="text" data-idx="${idx}" data-field="name" value="${ctrl.name}" placeholder="x:Name" />
-      <input type="text" data-idx="${idx}" data-field="label" value="${ctrl.label}" placeholder="Label" />
-      <input type="text" data-idx="${idx}" data-field="defaultVal" value="${ctrl.defaultVal}" placeholder="Default / CSV" />
-      <button class="control-remove" data-remove="${idx}" title="Remove">&times;</button>
-    `;
-    controlsListEl.appendChild(row);
-  });
-
-  controlsListEl.querySelectorAll("input, select").forEach(el => {
-    el.addEventListener("input", e => {
-      const i = Number(e.target.dataset.idx);
-      state.controls[i][e.target.dataset.field] = e.target.value;
-      updateAll();
-    });
-  });
-
-  controlsListEl.querySelectorAll("[data-remove]").forEach(btn => {
-    btn.addEventListener("click", e => {
-      state.controls.splice(Number(e.target.dataset.remove), 1);
-      renderControlRows();
-      updateAll();
-    });
-  });
+.bar-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--warm-wood);
+  margin-right: 4px;
 }
 
-function updateAll() {
-  renderWpfPreview();
-  updateCodeView();
-  drawIcon();
+.dl-chip {
+  background: #2b1c12;
+  color: var(--cream);
+  border: 1px solid var(--bark-brown);
+  border-radius: 7px;
+  padding: 6px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s;
 }
 
-function renderWpfPreview() {
-  const p = PALETTES[themeSelect.value];
-  const wpfWindow = document.getElementById("wpfWindow");
-  const banner = document.getElementById("previewBanner");
-  const header = document.getElementById("previewHeader");
-  const subheader = document.getElementById("previewSubheader");
-  const controlsBox = document.getElementById("previewControls");
-  const runBtn = document.getElementById("previewRunBtn");
-
-  wpfWindow.style.backgroundColor = p.bg;
-  wpfWindow.style.color = p.text;
-  wpfWindow.style.borderColor = p.border;
-  wpfWindow.style.maxWidth = windowWidthInput.value + "px";
-
-  document.getElementById("previewTitleBar").textContent = windowTitleInput.value;
-  banner.style.backgroundColor = p.surface;
-  banner.style.borderBottomColor = p.accent;
-  header.textContent = windowTitleInput.value;
-  header.style.color = p.hover;
-  subheader.textContent = windowSubtitleInput.value;
-  subheader.style.color = p.muted;
-
-  runBtn.textContent = runBtnTextInput.value;
-  runBtn.style.backgroundColor = p.accent;
-  runBtn.style.color = p.text;
-  runBtn.style.border = "1px solid " + p.hover;
-
-  controlsBox.innerHTML = "";
-  state.controls.forEach(c => {
-    const wrap = document.createElement("div");
-    if (c.type === "TextBox") {
-      wrap.innerHTML = `<label class="wpf-field-label">${c.label}</label><input class="wpf-input" type="text" value="${c.defaultVal}" style="background:${p.surface};color:${p.text};border:1px solid ${p.border};" />`;
-    } else if (c.type === "ComboBox") {
-      const opts = c.defaultVal.split(",").map(o => "<option>" + o.trim() + "</option>").join("");
-      wrap.innerHTML = `<label class="wpf-field-label">${c.label}</label><select class="wpf-input" style="background:${p.surface};color:${p.text};border:1px solid ${p.border};">${opts}</select>`;
-    } else if (c.type === "CheckBox") {
-      const checked = /^true$/i.test(c.defaultVal.trim()) ? "checked" : "";
-      wrap.innerHTML = `<label class="wpf-checkbox-row"><input type="checkbox" ${checked} style="accent-color:${p.accent};" /><span>${c.label}</span></label>`;
-    }
-    controlsBox.appendChild(wrap);
-  });
+.dl-chip:hover {
+  border-color: var(--leaf-bright);
+  background: #3B261A;
 }
 
-function generateXaml() {
-  const p = PALETTES[themeSelect.value];
-  const width = windowWidthInput.value || 420;
-  const height = Math.max(340, 210 + state.controls.length * 52);
-
-  const controlsXaml = state.controls.map(c => {
-    if (c.type === "TextBox") {
-      return `            <TextBlock Text="${escapeXml(c.label)}" FontWeight="SemiBold" Margin="0,0,0,4"/>\n            <TextBox x:Name="${c.name}" Text="${escapeXml(c.defaultVal)}" Margin="0,0,0,12"/>`;
-    }
-    if (c.type === "ComboBox") {
-      const items = c.defaultVal.split(",").map((item, i) => `                <ComboBoxItem Content="${escapeXml(item.trim())}"${i === 0 ? ' IsSelected="True"' : ""}/>`).join("\n");
-      return `            <TextBlock Text="${escapeXml(c.label)}" FontWeight="SemiBold" Margin="0,0,0,4"/>\n            <ComboBox x:Name="${c.name}" Margin="0,0,0,12" Padding="6,5">\n${items}\n            </ComboBox>`;
-    }
-    const isChecked = /^true$/i.test(c.defaultVal.trim()) ? "True" : "False";
-    return `            <CheckBox x:Name="${c.name}" Content="${escapeXml(c.label)}" IsChecked="${isChecked}" Margin="0,4,0,8"/>`;
-  }).join("\n\n");
-
-  return `<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="${escapeXml(windowTitleInput.value)}" Height="${height}" Width="${width}"
-        WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
-        Background="${p.bg}"
-        Foreground="${p.text}"
-        FontFamily="Segoe UI">
-
-    <Grid Margin="18">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <Border Grid.Row="0" Background="${p.surface}" BorderBrush="${p.accent}" BorderThickness="0,0,0,3" CornerRadius="6" Padding="14,10" Margin="0,0,0,16">
-            <StackPanel>
-                <TextBlock Text="${escapeXml(windowTitleInput.value)}" FontSize="16" FontWeight="Bold" Foreground="${p.hover}"/>
-                <TextBlock Text="${escapeXml(windowSubtitleInput.value)}" FontSize="11" Foreground="${p.muted}" Margin="0,2,0,0"/>
-            </StackPanel>
-        </Border>
-
-        <StackPanel Grid.Row="1">
-${controlsXaml}
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button Content="Cancel" Width="90" Margin="0,0,10,0" Background="${p.surface}" Foreground="${p.muted}" BorderBrush="${p.border}" Click="cancel_click"/>
-            <Button Content="${escapeXml(runBtnTextInput.value)}" Width="145" Background="${p.accent}" Foreground="${p.text}" BorderBrush="${p.hover}" Click="run_click"/>
-        </StackPanel>
-    </Grid>
-</Window>`;
+.dl-chip.accent {
+  background: var(--bark-brown);
+  color: #120b07;
+  border-color: var(--warm-wood);
 }
 
-function generatePython() {
-  const propsCode = state.controls.map(c => {
-    if (c.type === "TextBox") return `    @property\n    def ${c.name}_val(self):\n        return self.${c.name}.Text.strip()`;
-    if (c.type === "ComboBox") return `    @property\n    def ${c.name}_val(self):\n        return self.${c.name}.SelectedItem.Content if self.${c.name}.SelectedItem else ""`;
-    return `    @property\n    def ${c.name}_val(self):\n        return bool(self.${c.name}.IsChecked)`;
-  }).join("\n\n");
-
-  return `# -*- coding: utf-8 -*-
-__title__ = "${windowTitleInput.value}"
-__doc__ = "${windowSubtitleInput.value}"
-
-from pyrevit import forms, revit, script
-
-
-class GrootToolWindow(forms.WPFWindow):
-    def __init__(self, xaml_file_name):
-        forms.WPFWindow.__init__(self, xaml_file_name)
-
-${propsCode}
-
-    def run_click(self, sender, e):
-        self.DialogResult = True
-        self.Close()
-
-    def cancel_click(self, sender, e):
-        self.DialogResult = False
-        self.Close()
-
-
-ui = GrootToolWindow("ui.xaml")
-if ui.show_dialog():
-    output = script.get_output()
-    with revit.Transaction("${windowTitleInput.value}"):
-${state.uploadedBody}
-`;
+.dl-chip.primary {
+  background: linear-gradient(100deg, var(--leaf-bright), var(--leaf-green));
+  color: #10220c;
+  border-color: var(--leaf-bright);
 }
 
-function updateCodeView() {
-  codeOutputEl.textContent = state.activeTab === "xaml" ? generateXaml() : generatePython();
+.shell {
+  max-width: 1320px;
+  margin: auto;
+  padding: 24px 22px 56px;
 }
 
-function drawIcon() {
-  const ctx = iconCanvas.getContext("2d");
-  const p = PALETTES[themeSelect.value];
-  ctx.clearRect(0, 0, 96, 96);
-
-  ctx.fillStyle = p.bg;
-  roundRect(ctx, 4, 4, 88, 88, 16);
-  ctx.fill();
-
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = p.accent;
-  roundRect(ctx, 6, 6, 84, 84, 14);
-  ctx.stroke();
-
-  ctx.fillStyle = p.hover;
-  ctx.strokeStyle = p.hover;
-  ctx.lineWidth = 3.5;
-
-  const sym = iconSymbolSelect.value;
-  if (sym === "sprout") {
-    ctx.beginPath();
-    ctx.moveTo(48, 58);
-    ctx.lineTo(48, 30);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.ellipse(39, 34, 10, 6, -0.5, 0, Math.PI * 2);
-    ctx.ellipse(57, 30, 10, 6, 0.5, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (sym === "sheets") {
-    ctx.strokeRect(30, 22, 36, 32);
-  } else if (sym === "tag") {
-    ctx.strokeRect(28, 26, 40, 24);
-  } else if (sym === "gear") {
-    ctx.beginPath();
-    ctx.arc(48, 38, 12, 0, Math.PI * 2);
-    ctx.stroke();
-  } else {
-    ctx.beginPath();
-    ctx.arc(48, 32, 14, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillRect(45, 42, 6, 16);
-  }
-
-  const badgeText = (iconBadgeInput.value || "GRT").toUpperCase();
-  ctx.fillStyle = p.surface;
-  roundRect(ctx, 18, 62, 60, 22, 6);
-  ctx.fill();
-
-  ctx.fillStyle = p.text;
-  ctx.font = "bold 13px Segoe UI, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(badgeText, 48, 73);
-
-  if (iconLeafSelect.value === "yes") {
-    ctx.fillStyle = p.hover;
-    ctx.beginPath();
-    ctx.ellipse(76, 18, 7, 4, -0.6, 0, Math.PI * 2);
-    ctx.fill();
-  }
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 750;
 }
 
-function escapeXml(unsafe) {
-  return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+.brandmark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--leaf-bright), var(--leaf-green));
+  display: grid;
+  place-items: center;
+  color: #12210e;
+  font-weight: 900;
+  box-shadow: 0 8px 24px #6f9e4d50;
 }
 
-function downloadTextFile(filename, content) {
-  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
+.brand small {
+  display: block;
+  color: var(--warm-wood);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
 }
 
-async function downloadBundleZip() {
-  const zip = new JSZip();
-  let folderName = bundleNameInput.value.trim() || "GrootTool.pushbutton";
-  if (!folderName.endsWith(".pushbutton")) folderName += ".pushbutton";
-
-  const bundle = zip.folder(folderName);
-  bundle.file("ui.xaml", generateXaml());
-  bundle.file("script.py", generatePython());
-
-  const dataUrl = iconCanvas.toDataURL("image/png");
-  bundle.file("icon.png", dataUrl.replace(/^data:image\/png;base64,/, ""), { base64: true });
-
-  const content = await zip.generateAsync({ type: "blob" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(content);
-  link.download = folderName + ".zip";
-  link.click();
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-init();
+.local-pill {
+  font-size: 12px;
+  color: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: #1a110b;
+}
+
+.hero {
+  max-width: 780px;
+  margin: 0 0 26px;
+}
+
+.eyebrow {
+  color: var(--leaf-bright);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: clamp(30px, 4.2vw, 48px);
+  line-height: 1.06;
+  letter-spacing: -1.4px;
+  margin: 0 0 14px;
+  font-weight: 780;
+}
+
+h1 span { color: var(--warm-wood); }
+
+.hero p {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 0;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.panel {
+  background: linear-gradient(160deg, #23160ef2, #180f0af5);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px #00000066;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.panel-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-head h2 {
+  font-size: 15px;
+  margin: 0;
+  font-weight: 720;
+}
+
+.step {
+  font-size: 11px;
+  color: var(--warm-wood);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.panel-body { padding: 20px; }
+
+.dropzone {
+  border: 1.5px dashed var(--bark-brown);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #2b1b12, #1f140d);
+  padding: 24px 18px;
+  text-align: center;
+  transition: 0.18s;
+  cursor: pointer;
+}
+
+.dropzone:hover, .dropzone.drag {
+  border-color: var(--leaf-bright);
+  background: #322015;
+}
+
+.upload-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: #3B261A;
+  color: var(--leaf-bright);
+  border: 1px solid var(--leaf-green);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+}
+
+.dropzone strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.dropzone p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.drop-note {
+  margin-top: 8px !important;
+  font-size: 11px !important;
+}
+
+.browse {
+  color: var(--leaf-bright);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+input[type=file] { display: none; }
+
+.filebar {
+  display: none;
+  margin-top: 12px;
+  padding: 10px 13px;
+  background: #150d08;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filebar.show { display: flex; }
+
+.filename {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.filesize {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.text-btn {
+  border: 0;
+  background: none;
+  color: var(--leaf-bright);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.analysis {
+  margin-top: 16px;
+  display: none;
+}
+
+.analysis.show { display: block; }
+
+.analysis h3 {
+  font-size: 11.5px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--warm-wood);
+  margin: 0 0 8px;
+}
+
+.detected {
+  padding: 13px 14px;
+  background: #160e09;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.detected-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 750;
+  margin-bottom: 4px;
+  color: var(--cream);
+}
+
+.detected p {
+  color: var(--muted);
+  font-size: 12.5px;
+  margin: 0;
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.chip {
+  font-size: 11px;
+  color: var(--cream);
+  background: #2e1f14;
+  border: 1px solid var(--bark-brown);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.workflow-card {
+  margin-top: 10px;
+  padding: 12px 13px;
+  background: #1b110b;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.workflow-heading {
+  font-size: 10.5px;
+  color: var(--warm-wood);
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 9px;
+}
+
+.workflow-steps {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.workflow-step {
+  padding: 7px 6px;
+  background: #120b07;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.workflow-step span {
+  display: block;
+  color: var(--bark-brown);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.workflow-step b {
+  display: block;
+  color: var(--cream);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.workflow-steps i {
+  font-style: normal;
+  color: var(--leaf-green);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.workflow-note {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
+.section-label {
+  font-size: 11.5px;
+  color: var(--warm-wood);
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  font-weight: 750;
+  margin: 20px 0 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field.full { grid-column: 1 / -1; }
+
+label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--cream);
+  font-weight: 650;
+  margin: 0 0 6px;
+}
+
+input[type=text], select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #130c08;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 12.5px;
+  outline: none;
+}
+
+input[type=text]:focus, select:focus {
+  border-color: var(--leaf-green);
+}
+
+.swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 26px;
+  height: 26px;
+  border: 2px solid #ffffff44;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.swatch.active, .swatch:hover {
+  outline: 2px solid var(--leaf-bright);
+  outline-offset: 2px;
+}
+
+.ctrl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.ctrl-row {
+  display: grid;
+  grid-template-columns: 105px 1fr 1.1fr 1fr auto;
+  gap: 7px;
+  align-items: center;
+  background: #160e09;
+  border: 1px solid var(--line);
+  padding: 7px;
+  border-radius: 9px;
+}
+
+.del-btn {
+  background: #381914;
+  color: #ff9d88;
+  border: 1px solid #5e2a20;
+  border-radius: 7px;
+  width: 28px;
+  height: 32px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.preview-area {
+  padding: 20px;
+  background: radial-gradient(ellipse at center, #2e1e14 0, #1b110b 75%);
+}
+
+.preview-split {
+  display: grid;
+  grid-template-columns: 175px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.icon-card {
+  text-align: center;
+  background: #140c08;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 10px;
+}
+
+.icon-frame {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto 10px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: #0d0805;
+  border: 1px solid var(--bark-brown);
+}
+
+canvas {
+  width: 108px;
+  height: 108px;
+}
+
+.preview-name {
+  font-size: 13.5px;
+  font-weight: 750;
+}
+
+.preview-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.wpf-mock {
+  background: #3B261A;
+  border: 1.5px solid #8B5A35;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px #0009;
+}
+
+.wpf-titlebar {
+  background: #23150e;
+  color: #D2A16B;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 650;
+  display: flex;
+  justify-content: space-between;
+}
+
+.wpf-body { padding: 14px; }
+
+.wpf-banner {
+  background: #281910;
+  border-left: 4px solid #6F9E4D;
+  border-radius: 6px;
+  padding: 8px 11px;
+  margin-bottom: 12px;
+}
+
+.wpf-banner-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #F0D2A6;
+}
+
+.wpf-banner-sub {
+  font-size: 11px;
+  color: #D2A16B;
+}
+
+.wpf-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wpf-label {
+  font-size: 11px;
+  font-weight: 650;
+  color: #F0D2A6;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.wpf-input {
+  width: 100%;
+  background: #24160F;
+  border: 1px solid #8B5A35;
+  color: #F0D2A6;
+  padding: 6px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.wpf-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #F0D2A6;
+}
+
+.wpf-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #593822;
+}
+
+.wpf-btn {
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid #8B5A35;
+}
+
+.wpf-btn.cancel {
+  background: #24160F;
+  color: #D2A16B;
+}
+
+.wpf-btn.run {
+  background: #6F9E4D;
+  color: #120b07;
+}
+
+.actions {
+  padding: 16px 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 750;
+}
+
+.primary {
+  background: linear-gradient(100deg, var(--leaf-bright), var(--leaf-green));
+  color: #10210d;
+  padding: 12px 15px;
+}
+
+.secondary {
+  background: #2b1c12;
+  border: 1px solid var(--bark-brown);
+  color: var(--cream);
+  padding: 9px 12px;
+  font-size: 12px;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 11.5px;
+}
+
+.tab-group {
+  display: flex;
+  gap: 6px;
+}
+
+.tab-btn {
+  background: #150d08;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.tab-btn.active {
+  background: var(--leaf-green);
+  color: #120b07;
+  font-weight: 800;
+}
+
+.code-view {
+  margin: 0;
+  padding: 13px;
+  background: #0e0906;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--cream);
+  font: 12px/1.45 Consolas, monospace;
+  max-height: 290px;
+  overflow: auto;
+  white-space: pre;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  background: var(--leaf-bright);
+  color: #10220c;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  transition: 0.22s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 940px) {
+  .workspace, .preview-split, .action-row { grid-template-columns: 1fr; }
+}
