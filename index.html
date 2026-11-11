@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>pyRevit Groot UI & Icon Generator (Revit 2025 / 2026 / 2027)</title>
+  <title>pyRevit Groot UI & Icon Generator (Lightweight & Safe)</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -19,13 +19,12 @@
   <div class="shell">
     <header>
       <div class="version-pills">
-        <span class="v-pill">Revit 2025</span>
-        <span class="v-pill">Revit 2026</span>
-        <span class="v-pill">Revit 2027</span>
-        <span class="v-pill net-pill">.NET 8 &amp; pyRevit Ready</span>
+        <span class="v-pill">Revit 2025 / 2026 / 2027</span>
+        <span class="v-pill net-pill">Zero RAM Overhead</span>
+        <span class="v-pill net-pill">100% Non-Destructive UI</span>
       </div>
       <h1>pyRevit Groot Multi-Step UI &amp; Icon Generator</h1>
-      <p>Upload your <code>script.py</code> &rarr; Download <code>ui.xaml</code>, <code>script.py</code> &amp; <code>icon.png</code> with Groot UI for <strong>every step</strong></p>
+      <p>Upload your <code>script.py</code> &rarr; Download lightweight, read-only Groot UI files &amp; 96&times;96 icon</p>
     </header>
 
     <main class="two-windows">
@@ -58,12 +57,12 @@
               <strong id="detectedOpText">Waiting for file...</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">Multi-Step UI Coverage:</span>
-              <strong id="detectedStepsText">All Steps (Start, Lists, Picks, Inputs, Transactions &amp; Summary)</strong>
+              <span class="status-label">UI Step Mode:</span>
+              <strong id="detectedStepsText">Smooth Next-Step flow across all dialogs</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">Revit Compatibility:</span>
-              <strong>Revit 2025, 2026 &amp; 2027 (.NET 8 + 64-bit ElementId)</strong>
+              <span class="status-label">Safety &amp; Memory:</span>
+              <strong>Read-Only UI (Zero Revit DB or PC changes)</strong>
             </div>
           </div>
         </div>
@@ -85,13 +84,13 @@
             <div class="ui-mini-preview">
               <div class="ui-mini-titlebar">
                 <span id="previewWindowTitle">Revit Tool</span>
-                <span class="step-pill">STEP 1 &rarr; N</span>
+                <span class="step-pill">LIGHTWEIGHT UI</span>
               </div>
               <div class="ui-mini-body">
-                <div class="ui-mini-banner" id="previewBannerText">REVIT 2025 / 2026 / 2027 GROOT UI</div>
+                <div class="ui-mini-banner" id="previewBannerText">GROOT STEP DIALOG</div>
                 <div class="ui-mini-progress"><div class="ui-mini-bar"></div></div>
                 <div class="ui-mini-controls" id="previewControlsInfo">
-                  Wraps every step in Groot WPF UI &amp; auto-bridges 64-bit ElementId.Value
+                  Advances immediately on Next Step click &middot; Zero RAM lag
                 </div>
                 <div class="ui-mini-btns">
                   <span class="mini-cancel">Cancel</span>
@@ -111,7 +110,7 @@
               <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ icon.png</button>
             </div>
           </div>
-          <p class="helper-note">Place <code>script.py</code>, <code>ui.xaml</code>, and <code>icon.png</code> into your existing <code>.pushbutton</code> folder. Works in Revit 2025, 2026, and 2027.</p>
+          <p class="helper-note">Place <code>script.py</code>, <code>ui.xaml</code>, and <code>icon.png</code> into your <code>.pushbutton</code> folder. Does not alter Revit model data or PC files.</p>
         </div>
       </section>
     </main>
