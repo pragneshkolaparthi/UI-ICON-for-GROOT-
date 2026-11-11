@@ -6,6 +6,118 @@
   <title>pyRevit Groot Multi-Step UI & Icon Generator</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    /* Built-in fallback styles so index.html works even if style.css is missing */
+    :root {
+      --bg: #120b07; --panel: #1f140d; --line: #4b3120; --muted: #b59b82;
+      --text: #f5e6d3; --dark-bark: #3B261A; --bark-brown: #8B5A35;
+      --warm-wood: #D2A16B; --leaf-green: #6F9E4D; --leaf-bright: #9ce57f; --cream: #F0D2A6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--text); min-height: 100vh;
+      background: radial-gradient(ellipse at 15% 0%, #3b261a 0, transparent 40%), linear-gradient(145deg, #100a06, #1c110b 65%, #120b07);
+      font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .site-files-bar {
+      background: #180f0a; border-bottom: 1px solid var(--line); padding: 8px 20px;
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 12px; color: var(--warm-wood);
+    }
+    .site-files-bar button {
+      background: #2b1c12; color: var(--cream); border: 1px solid var(--bark-brown);
+      border-radius: 6px; padding: 4px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+    }
+    .shell { max-width: 1060px; margin: 0 auto; padding: 26px 20px 60px; }
+    header { text-align: center; margin-bottom: 24px; }
+    .version-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .v-pill {
+      background: #261810; color: var(--warm-wood); border: 1px solid var(--bark-brown);
+      padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;
+    }
+    .v-pill.net-pill { background: #1f2e18; color: var(--leaf-bright); border-color: var(--leaf-green); }
+    header h1 { margin: 0 0 6px; font-size: 26px; color: var(--cream); }
+    header p { margin: 0; color: var(--muted); font-size: 14px; }
+    .two-windows { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: stretch; }
+    .window-card {
+      background: linear-gradient(160deg, #24170ff5, #180f0af8); border: 1px solid var(--line);
+      border-radius: 18px; box-shadow: 0 16px 45px rgba(0,0,0,0.55); display: flex; flex-direction: column; overflow: hidden;
+    }
+    .window-head {
+      padding: 15px 20px; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .window-head h2 { margin: 0; font-size: 16px; color: var(--cream); }
+    .window-head span { font-size: 11px; color: var(--warm-wood); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .window-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+    .dropzone {
+      position: relative; border: 2px dashed var(--leaf-green); border-radius: 14px;
+      background: #261810; padding: 28px 18px; text-align: center; cursor: pointer; transition: 0.18s;
+    }
+    .dropzone:hover, .dropzone.drag { border-color: var(--leaf-bright); background: #312015; }
+    /* Full-box native file input overlay so clicking or dragging NEVER fails */
+    .file-overlay {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; z-index: 5;
+    }
+    .upload-icon {
+      width: 48px; height: 48px; border-radius: 13px; background: var(--dark-bark);
+      color: var(--leaf-bright); border: 1px solid var(--leaf-green);
+      display: grid; place-items: center; margin: 0 auto 10px;
+    }
+    .dropzone strong { display: block; font-size: 15.5px; color: var(--cream); margin-bottom: 4px; }
+    .dropzone p { margin: 0; color: var(--muted); font-size: 12.5px; }
+    .browse { color: var(--leaf-bright); text-decoration: underline; font-weight: 700; }
+    .paste-box { display: flex; flex-direction: column; gap: 6px; }
+    .paste-box label { font-size: 11.5px; color: var(--warm-wood); font-weight: 700; }
+    .paste-box textarea {
+      width: 100%; height: 74px; background: #150d08; color: var(--cream);
+      border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+      font: 12px/1.4 Consolas, monospace; resize: vertical; outline: none;
+    }
+    .paste-box textarea:focus { border-color: var(--leaf-green); }
+    .status-box {
+      background: #150d08; border: 1px solid var(--line); border-radius: 12px;
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .status-row { display: flex; justify-content: space-between; font-size: 12.5px; gap: 10px; }
+    .status-label { color: var(--muted); white-space: nowrap; }
+    .status-row strong { color: var(--cream); text-align: right; }
+    .preview-strip {
+      display: grid; grid-template-columns: 116px 1fr; gap: 14px; align-items: center;
+      background: #150d08; border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+    }
+    .icon-holder { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    canvas { width: 96px; height: 96px; border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+    .icon-holder span { font-size: 11px; color: var(--muted); }
+    .ui-mini-preview { background: var(--dark-bark); border: 1.5px solid var(--bark-brown); border-radius: 8px; overflow: hidden; }
+    .ui-mini-titlebar {
+      background: #23150e; color: var(--cream); font-size: 11px; font-weight: 700;
+      padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--bark-brown);
+    }
+    .step-pill { background: var(--leaf-green); color: #120b07; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 99px; }
+    .ui-mini-body { padding: 10px; }
+    .ui-mini-search { display: flex; gap: 5px; margin-bottom: 7px; }
+    .mini-filter { background: #24160F; color: var(--warm-wood); border: 1px solid var(--bark-brown); border-radius: 4px; padding: 3px 6px; font-size: 10px; font-weight: 800; }
+    .mini-search-box { flex: 1; background: #24160F; color: var(--muted); border: 1px solid var(--bark-brown); border-radius: 4px; padding: 3px 8px; font-size: 10.5px; }
+    .ui-mini-list { background: #24160F; border: 1px solid var(--bark-brown); border-radius: 4px; padding: 5px; margin-bottom: 8px; }
+    .mini-list-item { font-size: 10.5px; color: var(--cream); padding: 3px 6px; border-radius: 3px; }
+    .mini-list-item.selected { background: #4e6e37; color: #fff; font-weight: 700; margin-bottom: 2px; }
+    .ui-mini-btns { display: flex; }
+    .mini-run {
+      width: 100%; text-align: center; font-size: 11px; padding: 5px 10px;
+      border-radius: 4px; font-weight: 800; background: var(--leaf-green); color: #120b07; border: 1px solid var(--warm-wood);
+    }
+    .download-buttons { display: flex; flex-direction: column; gap: 10px; }
+    button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; font-weight: 750; transition: 0.15s; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-main { background: linear-gradient(100deg, var(--leaf-bright), var(--leaf-green)); color: #10210d; padding: 14px; font-size: 14px; }
+    .btn-grid-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .btn-sub { background: #2b1c12; color: var(--cream); border: 1px solid var(--bark-brown); padding: 10px 8px; font-size: 12px; }
+    .btn-sub:hover:not(:disabled) { border-color: var(--leaf-bright); background: var(--dark-bark); }
+    .helper-note { margin: 0; font-size: 11.5px; color: var(--muted); text-align: center; }
+    @media (max-width: 780px) { .two-windows, .preview-strip, .btn-grid-three { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
   <!-- Direct Download Bar for GitHub Website Hosting Files -->
@@ -20,11 +132,11 @@
     <header>
       <div class="version-pills">
         <span class="v-pill">Revit 2025 / 2026 / 2027</span>
-        <span class="v-pill net-pill">Themes SelectFromList &amp; Every Step</span>
+        <span class="v-pill net-pill">Themes Every Step in Groot Colours</span>
         <span class="v-pill net-pill">Zero RAM Overhead</span>
       </div>
       <h1>pyRevit Groot Multi-Step UI &amp; Icon Generator</h1>
-      <p>Upload your <code>script.py</code> &rarr; Colors <strong>every step</strong> (including <code>SelectFromList</code>) in Groot colours</p>
+      <p>Upload or paste your <code>script.py</code> &rarr; Colors <strong>every step</strong> in Groot colours</p>
     </header>
 
     <main class="two-windows">
@@ -32,37 +144,39 @@
       <section class="window-card">
         <div class="window-head">
           <h2>1. Upload Window</h2>
-          <span>Upload script.py</span>
+          <span>Upload or Paste script.py</span>
         </div>
         <div class="window-body">
-          <div class="dropzone" id="dropzone" role="button" tabindex="0">
+          <div class="dropzone" id="dropzone">
+            <!-- Native full-overlay file input: clicking or dragging here ALWAYS works -->
+            <input id="fileInput" class="file-overlay" type="file" title="Click or drop your script.py file here" />
             <div class="upload-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 16V4m-5 5 5-5 5 5"/>
                 <path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/>
               </svg>
             </div>
-            <strong>Drop your pyRevit script.py here</strong>
-            <p>or <span class="browse">click to browse</span> from your computer</p>
+            <strong id="dropTitle">Click here or drop your script.py</strong>
+            <p id="dropSub">Accepts any <span class="browse">.py script file</span> directly from your PC</p>
           </div>
-          <input id="fileInput" type="file" accept=".py,text/x-python,text/plain" />
+
+          <div class="paste-box">
+            <label for="pasteInput">Or paste your script.py code directly below:</label>
+            <textarea id="pasteInput" placeholder="# Paste your pyRevit Python script here if you prefer not to browse..."></textarea>
+          </div>
 
           <div class="status-box">
             <div class="status-row">
-              <span class="status-label">Uploaded Script:</span>
-              <strong id="fileNameText">None</strong>
+              <span class="status-label">Loaded Script:</span>
+              <strong id="fileNameText">Waiting for upload or paste...</strong>
             </div>
             <div class="status-row">
               <span class="status-label">Detected Operation:</span>
-              <strong id="detectedOpText">Waiting for script.py...</strong>
+              <strong id="detectedOpText">Auto-detect ready</strong>
             </div>
             <div class="status-row">
               <span class="status-label">Groot Colour Coverage:</span>
               <strong id="detectedStepsText">Every Step (SelectFromList, Inputs, Switches &amp; Alerts)</strong>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Safety &amp; Performance:</span>
-              <strong>Native pyRevit Logic &middot; 0 RAM Lag &middot; 0 Model Changes</strong>
             </div>
           </div>
         </div>
@@ -92,7 +206,7 @@
                   <span class="mini-filter">A-Z</span>
                   <span class="mini-search-box">Search filter...</span>
                 </div>
-                <div class="ui-mini-list" id="previewStepBody">
+                <div class="ui-mini-list">
                   <div class="mini-list-item selected">RSP-Room No_1,75-12SA</div>
                   <div class="mini-list-item">Every Step in Groot Bark &amp; Moss Colours</div>
                 </div>
@@ -113,12 +227,20 @@
               <button class="btn-sub" id="dlPyBtn" type="button" disabled title="Your exact script with the Groot color theme hook for SelectFromList">↓ script.py (Themed)</button>
             </div>
           </div>
-          <p class="helper-note">Copy the downloaded files into your <code>.pushbutton</code> folder. Your original script logic and button name remain 100% untouched while every step turns Groot colours.</p>
+          <p class="helper-note">Put the downloaded files into your <code>.pushbutton</code> folder. Every step (`Step 1`, `Step 2`, etc.) will appear in Groot colours and advance immediately on click.</p>
         </div>
       </section>
     </main>
   </div>
 
   <script src="app.js"></script>
+  <script>
+    // Self-bootstrapping fallback if app.js was not loaded
+    if (!window.__GROOT_STUDIO_READY__) {
+      const s = document.createElement('script');
+      s.src = 'app.js';
+      document.body.appendChild(s);
+    }
+  </script>
 </body>
 </html>
