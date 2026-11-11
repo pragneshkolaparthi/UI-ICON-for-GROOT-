@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>pyRevit Groot UI & Icon Generator</title>
+  <title>pyRevit Groot UI & Icon Generator (Revit 2025 / 2026 / 2027)</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -18,8 +18,14 @@
 
   <div class="shell">
     <header>
-      <h1>pyRevit Groot UI &amp; Icon Generator</h1>
-      <p>Upload your <code>script.py</code> &rarr; Download working Groot UI files &amp; 96&times;96 icon</p>
+      <div class="version-pills">
+        <span class="v-pill">Revit 2025</span>
+        <span class="v-pill">Revit 2026</span>
+        <span class="v-pill">Revit 2027</span>
+        <span class="v-pill net-pill">.NET 8 &amp; pyRevit Ready</span>
+      </div>
+      <h1>pyRevit Groot Multi-Step UI &amp; Icon Generator</h1>
+      <p>Upload your <code>script.py</code> &rarr; Download <code>ui.xaml</code>, <code>script.py</code> &amp; <code>icon.png</code> with Groot UI for <strong>every step</strong></p>
     </header>
 
     <main class="two-windows">
@@ -37,12 +43,12 @@
                 <path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/>
               </svg>
             </div>
-            <strong id="dropTitle">Drop your pyRevit script.py here</strong>
-            <p id="dropSub">or <span class="browse">click to browse</span> from your computer</p>
+            <strong>Drop your pyRevit script.py here</strong>
+            <p>or <span class="browse">click to browse</span> from your computer</p>
           </div>
           <input id="fileInput" type="file" accept=".py,text/x-python,text/plain" />
 
-          <div class="status-box" id="statusBox">
+          <div class="status-box">
             <div class="status-row">
               <span class="status-label">Uploaded Script:</span>
               <strong id="fileNameText">None</strong>
@@ -52,8 +58,12 @@
               <strong id="detectedOpText">Waiting for file...</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">Detected Inputs:</span>
-              <strong id="detectedInputsText">Auto-launch confirmation dialog</strong>
+              <span class="status-label">Multi-Step UI Coverage:</span>
+              <strong id="detectedStepsText">All Steps (Start, Lists, Picks, Inputs, Transactions &amp; Summary)</strong>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Revit Compatibility:</span>
+              <strong>Revit 2025, 2026 &amp; 2027 (.NET 8 + 64-bit ElementId)</strong>
             </div>
           </div>
         </div>
@@ -73,13 +83,19 @@
             </div>
 
             <div class="ui-mini-preview">
-              <div class="ui-mini-titlebar" id="previewWindowTitle">Revit Tool</div>
+              <div class="ui-mini-titlebar">
+                <span id="previewWindowTitle">Revit Tool</span>
+                <span class="step-pill">STEP 1 &rarr; N</span>
+              </div>
               <div class="ui-mini-body">
-                <div class="ui-mini-banner" id="previewBannerText">Ready to run operation</div>
-                <div class="ui-mini-controls" id="previewControlsInfo">Preserves original ribbon name &amp; transactions</div>
+                <div class="ui-mini-banner" id="previewBannerText">REVIT 2025 / 2026 / 2027 GROOT UI</div>
+                <div class="ui-mini-progress"><div class="ui-mini-bar"></div></div>
+                <div class="ui-mini-controls" id="previewControlsInfo">
+                  Wraps every step in Groot WPF UI &amp; auto-bridges 64-bit ElementId.Value
+                </div>
                 <div class="ui-mini-btns">
                   <span class="mini-cancel">Cancel</span>
-                  <span class="mini-run">Run</span>
+                  <span class="mini-run">Next Step &rarr;</span>
                 </div>
               </div>
             </div>
@@ -95,7 +111,7 @@
               <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ icon.png</button>
             </div>
           </div>
-          <p class="helper-note">Drop the downloaded <code>script.py</code>, <code>ui.xaml</code>, and <code>icon.png</code> directly into your existing <code>.pushbutton</code> folder, then reload pyRevit.</p>
+          <p class="helper-note">Place <code>script.py</code>, <code>ui.xaml</code>, and <code>icon.png</code> into your existing <code>.pushbutton</code> folder. Works in Revit 2025, 2026, and 2027.</p>
         </div>
       </section>
     </main>
