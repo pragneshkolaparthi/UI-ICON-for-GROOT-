@@ -55,12 +55,12 @@ body {
 .shell {
   max-width: 1060px;
   margin: 0 auto;
-  padding: 28px 20px 60px;
+  padding: 26px 20px 60px;
 }
 
 header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .version-pills {
@@ -89,7 +89,7 @@ header {
 
 header h1 {
   margin: 0 0 6px;
-  font-size: 27px;
+  font-size: 26px;
   color: var(--cream);
 }
 
@@ -117,7 +117,7 @@ header p {
 }
 
 .window-head {
-  padding: 16px 20px;
+  padding: 15px 20px;
   border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
@@ -139,18 +139,19 @@ header p {
 }
 
 .window-body {
-  padding: 22px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   flex: 1;
 }
 
 .dropzone {
-  border: 2px dashed var(--bark-brown);
+  position: relative;
+  border: 2px dashed var(--leaf-green);
   border-radius: 14px;
   background: #261810;
-  padding: 36px 20px;
+  padding: 28px 18px;
   text-align: center;
   cursor: pointer;
   transition: 0.18s;
@@ -159,24 +160,34 @@ header p {
 .dropzone:hover,
 .dropzone.drag {
   border-color: var(--leaf-bright);
-  background: #2f1e14;
+  background: #312015;
+}
+
+.file-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 5;
 }
 
 .upload-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
   background: var(--dark-bark);
   color: var(--leaf-bright);
   border: 1px solid var(--leaf-green);
   display: grid;
   place-items: center;
-  margin: 0 auto 12px;
+  margin: 0 auto 10px;
 }
 
 .dropzone strong {
   display: block;
-  font-size: 16px;
+  font-size: 15.5px;
   color: var(--cream);
   margin-bottom: 4px;
 }
@@ -184,7 +195,7 @@ header p {
 .dropzone p {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .browse {
@@ -193,18 +204,43 @@ header p {
   font-weight: 700;
 }
 
-input[type="file"] {
-  display: none;
+.paste-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.paste-box label {
+  font-size: 11.5px;
+  color: var(--warm-wood);
+  font-weight: 700;
+}
+
+.paste-box textarea {
+  width: 100%;
+  height: 74px;
+  background: #150d08;
+  color: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: 12px/1.4 Consolas, monospace;
+  resize: vertical;
+  outline: none;
+}
+
+.paste-box textarea:focus {
+  border-color: var(--leaf-green);
 }
 
 .status-box {
   background: #150d08;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .status-row {
@@ -226,7 +262,7 @@ input[type="file"] {
 
 .preview-strip {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 116px 1fr;
   gap: 14px;
   align-items: center;
   background: #150d08;
