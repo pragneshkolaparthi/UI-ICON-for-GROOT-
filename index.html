@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>pyRevit Groot UI & Icon Generator (Revit 2025 / 2026 / 2027)</title>
+  <title>pyRevit Groot Multi-Step UI & Icon Generator</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -20,11 +20,11 @@
     <header>
       <div class="version-pills">
         <span class="v-pill">Revit 2025 / 2026 / 2027</span>
+        <span class="v-pill net-pill">Themes SelectFromList &amp; Every Step</span>
         <span class="v-pill net-pill">Zero RAM Overhead</span>
-        <span class="v-pill net-pill">Outputs Only ui.xaml &amp; icon.png</span>
       </div>
       <h1>pyRevit Groot Multi-Step UI &amp; Icon Generator</h1>
-      <p>Upload your <code>script.py</code> &rarr; Download <code>ui.xaml</code> &amp; <code>icon.png</code> (your <code>script.py</code> stays untouched)</p>
+      <p>Upload your <code>script.py</code> &rarr; Colors <strong>every step</strong> (including <code>SelectFromList</code>) in Groot colours</p>
     </header>
 
     <main class="two-windows">
@@ -32,7 +32,7 @@
       <section class="window-card">
         <div class="window-head">
           <h2>1. Upload Window</h2>
-          <span>Read-Only Script Reader</span>
+          <span>Upload script.py</span>
         </div>
         <div class="window-body">
           <div class="dropzone" id="dropzone" role="button" tabindex="0">
@@ -57,12 +57,12 @@
               <strong id="detectedOpText">Waiting for script.py...</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">Detected Script Steps:</span>
-              <strong id="detectedStepsText">Step 1 (Select) &rarr; Step 2 (Process) &rarr; Step 3 (Execute)</strong>
+              <span class="status-label">Groot Colour Coverage:</span>
+              <strong id="detectedStepsText">Every Step (SelectFromList, Inputs, Switches &amp; Alerts)</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">Safety &amp; RAM:</span>
-              <strong>100% Read-Only UI &middot; Zero Revit/PC Changes</strong>
+              <span class="status-label">Safety &amp; Performance:</span>
+              <strong>Native pyRevit Logic &middot; 0 RAM Lag &middot; 0 Model Changes</strong>
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@
       <section class="window-card">
         <div class="window-head">
           <h2>2. Download Window</h2>
-          <span>ui.xaml + icon.png Only</span>
+          <span>Groot UI Files &amp; Icon</span>
         </div>
         <div class="window-body">
           <div class="preview-strip">
@@ -81,24 +81,23 @@
               <span>icon.png (96&times;96)</span>
             </div>
 
-            <!-- Interactive Multi-Step Preview -->
+            <!-- Groot-Coloured SelectFromList Step Preview -->
             <div class="ui-mini-preview">
               <div class="ui-mini-titlebar">
-                <span id="previewWindowTitle">Revit Tool</span>
-                <span class="step-pill" id="previewStepBadge">STEP 1 OF 3</span>
+                <span id="previewWindowTitle">Step 1: Select Generic Annotation</span>
+                <span class="step-pill">GROOT THEME</span>
               </div>
               <div class="ui-mini-body">
-                <div class="ui-mini-banner" id="previewBannerText">STEP 1: INPUT &amp; SELECTION</div>
-                <div class="ui-mini-progress">
-                  <div class="ui-mini-bar" id="previewProgressBar" style="width: 33%;"></div>
+                <div class="ui-mini-search">
+                  <span class="mini-filter">A-Z</span>
+                  <span class="mini-search-box">Search filter...</span>
                 </div>
-                <div class="ui-mini-controls" id="previewStepBody">
-                  Upload script.py to test the Next Step flow here and in Revit.
+                <div class="ui-mini-list" id="previewStepBody">
+                  <div class="mini-list-item selected">RSP-Room No_1,75-12SA</div>
+                  <div class="mini-list-item">Every Step in Groot Bark &amp; Moss Colours</div>
                 </div>
                 <div class="ui-mini-btns">
-                  <button type="button" class="mini-back" id="previewBackBtn" style="display:none;">&larr; Back</button>
-                  <span class="mini-cancel">Cancel</span>
-                  <button type="button" class="mini-run" id="previewNextBtn">Next Step &rarr;</button>
+                  <span class="mini-run" id="previewBtnText">Select Annotation &rarr;</span>
                 </div>
               </div>
             </div>
@@ -106,14 +105,15 @@
 
           <div class="download-buttons">
             <button class="btn-main" id="dlZipBtn" type="button" disabled>
-              ⬇ Download UI &amp; Icon (.ZIP)
+              ⬇ Download All Files (.ZIP)
             </button>
-            <div class="btn-grid-two">
-              <button class="btn-sub" id="dlXamlBtn" type="button" disabled>↓ Download ui.xaml</button>
-              <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ Download icon.png</button>
+            <div class="btn-grid-three">
+              <button class="btn-sub" id="dlXamlBtn" type="button" disabled>↓ ui.xaml</button>
+              <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ icon.png</button>
+              <button class="btn-sub" id="dlPyBtn" type="button" disabled title="Your exact script with the Groot color theme hook for SelectFromList">↓ script.py (Themed)</button>
             </div>
           </div>
-          <p class="helper-note">Downloads <strong>only</strong> <code>ui.xaml</code> and <code>icon.png</code>. Your existing <code>script.py</code> and Revit model are never modified.</p>
+          <p class="helper-note">Copy the downloaded files into your <code>.pushbutton</code> folder. Your original script logic and button name remain 100% untouched while every step turns Groot colours.</p>
         </div>
       </section>
     </main>
