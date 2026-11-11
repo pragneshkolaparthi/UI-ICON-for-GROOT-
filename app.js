@@ -1,15 +1,10 @@
-function initGrootUIOnlyStudio() {
+function initGrootEveryStepStudio() {
   const $ = id => document.getElementById(id);
   const canvas = $('iconCanvas'), ctx = canvas.getContext('2d');
 
   let generatedXaml = '';
-  let toolDisplayName = 'Revit Tool';
-  let previewStepIndex = 0;
-  let currentSteps = [
-    { title: 'STEP 1: SELECT & READ INPUTS', desc: 'Collects target views, sheets, or model elements from the active Revit document.' },
-    { title: 'STEP 2: CONFIGURE & VALIDATE', desc: 'Applies Groot tool rules, filters, and template/parameter mappings.' },
-    { title: 'STEP 3: READY TO EXECUTE', desc: 'All checks passed. Click Run Tool to execute your script in Revit.' }
-  ];
+  let generatedSelectFromListXaml = '';
+  let generatedPy = '';
 
   const patterns = [
     ['transfer', /(?:view|sheet|viewport).{0,55}(?:transfer|copy|move|duplicate)|(?:transfer|copy|move|duplicate).{0,55}(?:view|sheet|viewport)/gi],
@@ -28,159 +23,23 @@ function initGrootUIOnlyStudio() {
   ];
 
   const operationProfiles = {
-    view_transfer: {
-      title: 'Transfer Views Between Sheets',
-      art: 'view_transfer',
-      steps: [
-        { title: 'STEP 1: READ SOURCE SHEET & VIEWS', desc: 'Reads source sheet viewports and collects target destination sheets.' },
-        { title: 'STEP 2: ALIGN VIEWPORT & TEMPLATE', desc: 'Matches viewport placement coordinates and view template assignments.' },
-        { title: 'STEP 3: COMPLETE SHEET TRANSFER', desc: 'Ready to transfer views. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    viewport_place: {
-      title: 'Place Views on Sheets',
-      art: 'viewport_place',
-      steps: [
-        { title: 'STEP 1: SELECT MODEL VIEWS', desc: 'Collects selected plan, section, or elevation views from the browser.' },
-        { title: 'STEP 2: TARGET SHEET POSITIONING', desc: 'Calculates viewport center points on the destination drawing sheets.' },
-        { title: 'STEP 3: PLACE VIEWPORTS', desc: 'Ready to create viewports. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    view_duplicate: {
-      title: 'Duplicate Revit Views',
-      art: 'view_duplicate',
-      steps: [
-        { title: 'STEP 1: COLLECT SOURCE VIEWS', desc: 'Identifies source views selected for duplication.' },
-        { title: 'STEP 2: DUPLICATION OPTIONS', desc: 'Applies duplicate with detailing / dependent view settings and naming.' },
-        { title: 'STEP 3: CREATE DUPLICATE VIEWS', desc: 'Ready to generate views. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    view_template: {
-      title: 'Copy / Apply View Templates',
-      art: 'view_template',
-      steps: [
-        { title: 'STEP 1: SELECT SOURCE TEMPLATES', desc: 'Reads view templates from the active or linked Revit document.' },
-        { title: 'STEP 2: MAP TARGET VIEWS', desc: 'Matches category overrides, filters, and view template parameters.' },
-        { title: 'STEP 3: APPLY VIEW TEMPLATES', desc: 'Ready to apply view templates. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    schedule_create: {
-      title: 'Unified Schedule Export / Creation',
-      art: 'schedule_create',
-      steps: [
-        { title: 'STEP 1: COLLECT SCHEDULES & LINKS', desc: 'Scans active model and linked files for schedule data and fields.' },
-        { title: 'STEP 2: FORMAT TABULAR DATA', desc: 'Organizes rows, headers, and export file path settings.' },
-        { title: 'STEP 3: EXPORT / UPDATE SCHEDULES', desc: 'Ready to process schedules. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    sheet_create: {
-      title: 'Drawing Sheet Automation',
-      art: 'sheet_create',
-      steps: [
-        { title: 'STEP 1: SELECT TITLEBLOCK & LIST', desc: 'Reads titleblock families and sheet numbering sequence.' },
-        { title: 'STEP 2: ASSIGN SHEET PARAMETERS', desc: 'Populates sheet names, numbers, and revision metadata.' },
-        { title: 'STEP 3: GENERATE SHEETS', desc: 'Ready to create drawing sheets. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    stair_path: {
-      title: 'Stair Path Automation',
-      art: 'stair_path',
-      steps: [
-        { title: 'STEP 1: COLLECT STAIR ELEMENTS', desc: 'Finds stairs and risers in the active plan view.' },
-        { title: 'STEP 2: COMPUTE UP/DOWN ROUTE', desc: 'Calculates stair path direction lines and annotation graphics.' },
-        { title: 'STEP 3: PLACE STAIR PATHS', desc: 'Ready to draw stair paths. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    tag_create: {
-      title: 'Place Tags & Annotations',
-      art: 'tag_create',
-      steps: [
-        { title: 'STEP 1: SCAN ROOMS & ELEMENTS', desc: 'Finds untagged rooms, doors, or elements in the active view.' },
-        { title: 'STEP 2: ALIGN TAG LOCATIONS', desc: 'Calculates tag leader points and avoids annotation overlaps.' },
-        { title: 'STEP 3: PLACE REVIT TAGS', desc: 'Ready to place tags. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    dimension_create: {
-      title: 'Dimension Automation',
-      art: 'dimension_create',
-      steps: [
-        { title: 'STEP 1: PICK GEOMETRY REFERENCES', desc: 'Reads grid, wall, or element reference planes for dimensioning.' },
-        { title: 'STEP 2: OFFSET & DIMENSION STYLE', desc: 'Aligns dimension string offsets and linear style settings.' },
-        { title: 'STEP 3: CREATE DIMENSIONS', desc: 'Ready to place dimensions. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    clash_detection: {
-      title: 'Clash & Coordination Check',
-      art: 'clash_detection',
-      steps: [
-        { title: 'STEP 1: COLLECT MODEL SOLIDS', desc: 'Gathers structural, architectural, and MEP elements for checking.' },
-        { title: 'STEP 2: INTERSECTION ANALYSIS', desc: 'Tests 3D bounding boxes and solid geometry overlaps.' },
-        { title: 'STEP 3: HIGHLIGHT CLASHES', desc: 'Ready to report clashes. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    wall_adjust: {
-      title: 'Element & Section Toggle / Adjust',
-      art: 'wall_adjust',
-      steps: [
-        { title: 'STEP 1: IDENTIFY TARGET ELEMENTS', desc: 'Reads selected walls, section boxes, or building elements.' },
-        { title: 'STEP 2: COMPUTE ALIGNMENT STATE', desc: 'Prepares visibility, crop region, or location adjustments.' },
-        { title: 'STEP 3: UPDATE ACTIVE VIEW / MODEL', desc: 'Ready to apply changes. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    element_move: {
-      title: 'Move / Copy Elements',
-      art: 'element_move',
-      steps: [
-        { title: 'STEP 1: SELECT SOURCE ELEMENTS', desc: 'Reads elements selected in the active Revit model.' },
-        { title: 'STEP 2: TRANSFORM VECTOR SETUP', desc: 'Calculates translation coordinates and copy options.' },
-        { title: 'STEP 3: EXECUTE TRANSFORM', desc: 'Ready to transform elements. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    family_instance: {
-      title: 'Family Placement & Management',
-      art: 'family_instance',
-      steps: [
-        { title: 'STEP 1: LOCATE FAMILY SYMBOL', desc: 'Finds target family types and host placement references.' },
-        { title: 'STEP 2: MAP INSTANCE PARAMETERS', desc: 'Sets level, offset, and instance parameter values.' },
-        { title: 'STEP 3: PLACE FAMILY INSTANCES', desc: 'Ready to place families. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    export_file: {
-      title: 'Export Revit Data',
-      art: 'export_file',
-      steps: [
-        { title: 'STEP 1: COLLECT EXPORT SET', desc: 'Gathers views, schedules, or sheets queued for export.' },
-        { title: 'STEP 2: FORMAT OUTPUT OPTIONS', desc: 'Configures naming rules and target export structure.' },
-        { title: 'STEP 3: RUN EXPORT', desc: 'Ready to export files. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    import_file: {
-      title: 'Import External Data',
-      art: 'import_file',
-      steps: [
-        { title: 'STEP 1: READ EXTERNAL SOURCE', desc: 'Parses incoming spreadsheet or external link data.' },
-        { title: 'STEP 2: MAP TO REVIT PARAMETERS', desc: 'Matches external keys to Revit element IDs and parameters.' },
-        { title: 'STEP 3: APPLY IMPORT', desc: 'Ready to update data. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    level_create: {
-      title: 'Level & Datum Automation',
-      art: 'level_create',
-      steps: [
-        { title: 'STEP 1: READ DATUM ELEVATIONS', desc: 'Collects existing levels and grid datum references.' },
-        { title: 'STEP 2: CONFIGURE ELEVATION OFFSETS', desc: 'Validates datum names and elevation spacings.' },
-        { title: 'STEP 3: UPDATE LEVELS', desc: 'Ready to update datums. Click Run Tool to execute in Revit.' }
-      ]
-    },
-    parameter_update: {
-      title: 'Revit Element Automation',
-      art: 'parameter_update',
-      steps: [
-        { title: 'STEP 1: COLLECT TARGET ELEMENTS', desc: 'Selects and filters target elements in the active Revit document.' },
-        { title: 'STEP 2: CONFIGURE PARAMETERS', desc: 'Prepares parameter values and validates model state.' },
-        { title: 'STEP 3: EXECUTE IN REVIT', desc: 'Ready to run automation. Click Run Tool to execute in Revit.' }
-      ]
-    }
+    view_transfer: { title: 'Transfer Views / Sheets', art: 'view_transfer' },
+    viewport_place: { title: 'Place Viewport on Sheet', art: 'viewport_place' },
+    view_duplicate: { title: 'Duplicate Revit Views', art: 'view_duplicate' },
+    view_template: { title: 'Copy / Apply View Templates', art: 'view_template' },
+    schedule_create: { title: 'Schedule Export / Creation', art: 'schedule_create' },
+    sheet_create: { title: 'Drawing Sheet Automation', art: 'sheet_create' },
+    stair_path: { title: 'Stair Path Automation', art: 'stair_path' },
+    tag_create: { title: 'Place Tags / Annotations', art: 'tag_create' },
+    dimension_create: { title: 'Dimension Automation', art: 'dimension_create' },
+    clash_detection: { title: 'Clash Detection', art: 'clash_detection' },
+    wall_adjust: { title: 'Element / Section Adjust', art: 'wall_adjust' },
+    element_move: { title: 'Move / Copy Elements', art: 'element_move' },
+    family_instance: { title: 'Family Placement', art: 'family_instance' },
+    export_file: { title: 'Export Revit Data', art: 'export_file' },
+    import_file: { title: 'Import External Data', art: 'import_file' },
+    level_create: { title: 'Level & Datum Management', art: 'level_create' },
+    parameter_update: { title: 'Revit Element Automation', art: 'parameter_update' }
   };
 
   function detectOperationKey(source) {
@@ -193,7 +52,7 @@ function initGrootUIOnlyStudio() {
     if (has(/Stairs?Path|stair[_\s-]*path|up[_\s-]*down[_\s-]*path/i)) return 'stair_path';
     if (has(/ScheduleView\.CreateSchedule|CreateSchedule\s*\(|ScheduleSheetInstance\.Create|schedule/i)) return 'schedule_create';
     if (has(/ViewSheet\.Create|CreateSheet\s*\(/i)) return 'sheet_create';
-    if (has(/IndependentTag\.Create|NewTag\s*\(|RoomTag|tag/i)) return 'tag_create';
+    if (has(/IndependentTag\.Create|NewTag\s*\(|RoomTag|Generic\s*Annotation|tag/i)) return 'tag_create';
     if (has(/NewDimension|Dimension\.Create/i)) return 'dimension_create';
     if (has(/clash|interference|collision|BooleanOperationsUtils/i)) return 'clash_detection';
     if (has(/ElementTransformUtils\.MoveElement|Location\.Move/i)) return 'element_move';
@@ -219,454 +78,341 @@ function initGrootUIOnlyStudio() {
     return map[best] || 'parameter_update';
   }
 
-  function humanize(s) {
-    return s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase());
-  }
-
   function escapeXml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  function extractScriptConstants(text) {
-    const vars = [];
-    text.split(/\r?\n/).forEach(line => {
-      const m = line.match(/^([A-Z][A-Z0-9_]{1,28})\s*=\s*(.+)$/);
-      if (m && !m[1].startsWith('__')) {
-        const varName = m[1];
-        const rhs = m[2].split('#')[0].trim();
-        if (/^(True|False)$/.test(rhs)) {
-          vars.push({ name: varName.toLowerCase() + '_cb', type: 'CheckBox', label: humanize(varName.toLowerCase()), val: rhs });
-        } else if (/^["'][^"']*["']$/.test(rhs)) {
-          vars.push({ name: varName.toLowerCase() + '_tb', type: 'TextBox', label: humanize(varName.toLowerCase()), val: rhs.slice(1, -1) });
-        } else if (/^\d+(\.\d+)?$/.test(rhs)) {
-          vars.push({ name: varName.toLowerCase() + '_tb', type: 'TextBox', label: humanize(varName.toLowerCase()), val: rhs });
-        }
-      }
-    });
-    return vars;
-  }
-
   function processUploadedScript(text, fileName) {
-    const opKey = detectOperationKey(text);
+    // Strip any previous Groot block cleanly
+    let cleanedCode = text.replace(/# --- GROOT UI START ---[\s\S]*?# --- GROOT UI END ---\r?\n?/g, '');
+    cleanedCode = cleanedCode.replace(/\n# Apply Step 1 Groot UI parameter values[\s\S]*$/g, '');
+    cleanedCode = cleanedCode.replace(/\n_groot_show_final_summary\(\)\s*$/g, '');
+
+    const opKey = detectOperationKey(cleanedCode);
     const opProfile = operationProfiles[opKey] || operationProfiles.parameter_update;
 
-    const titleMatch = text.match(/^\s*__title__\s*=\s*["']([^"']+)["']/m);
-    const docMatch = text.match(/^\s*__doc__\s*=\s*["']([^"']+)["']/m);
-    const rawFileName = fileName.replace(/\.py$/i, '');
+    // Extract step titles from the user's script (e.g. title="Step 1: Select Generic Annotation to Place")
+    const stepTitles = [...cleanedCode.matchAll(/title\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
+    const btnNames = [...cleanedCode.matchAll(/button_name\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
 
-    toolDisplayName = titleMatch
-      ? titleMatch[1].replace(/\\n/g, ' ').trim()
-      : (rawFileName.toLowerCase() === 'script' ? opProfile.title : humanize(rawFileName));
-    const toolSummary = docMatch ? docMatch[1].replace(/\\n/g, ' ').trim() : opProfile.title;
+    const firstStepTitle = stepTitles[0] || opProfile.title;
+    const firstBtnName = btnNames[0] || 'Select & Continue ->';
 
-    currentSteps = opProfile.steps.map(s => ({ ...s }));
-    const detectedVars = extractScriptConstants(text);
-
-    generatedXaml = buildPureXamlMultiStepWizard(toolDisplayName, toolSummary, currentSteps, detectedVars);
+    generatedSelectFromListXaml = buildGrootSelectFromListXaml(firstStepTitle);
+    generatedXaml = generatedSelectFromListXaml;
+    generatedPy = buildNonIntrusiveGrootThemeHookPy(cleanedCode, firstStepTitle);
 
     $('fileNameText').textContent = fileName;
     $('detectedOpText').textContent = opProfile.title;
-    $('detectedStepsText').textContent = currentSteps.map((s, i) => `Step ${i + 1}`).join(' → ') + ' → Run';
-    $('previewWindowTitle').textContent = toolDisplayName;
+    $('detectedStepsText').textContent = stepTitles.length > 0
+      ? `${stepTitles.length} Step(s) (${stepTitles.slice(0, 3).join(' → ')})`
+      : 'All SelectFromList, Input, Switch & Alert steps';
 
-    previewStepIndex = 0;
-    updateInteractivePreview();
+    $('previewWindowTitle').textContent = firstStepTitle;
+    $('previewBtnText').textContent = firstBtnName;
+
     drawIcon(opProfile.art);
 
-    ['dlZipBtn', 'dlXamlBtn', 'dlIconBtn'].forEach(id => {
+    ['dlZipBtn', 'dlXamlBtn', 'dlIconBtn', 'dlPyBtn'].forEach(id => {
       $(id).disabled = false;
     });
   }
 
-  function updateInteractivePreview() {
-    const total = currentSteps.length;
-    const stepObj = currentSteps[previewStepIndex] || currentSteps[0];
-    const pct = Math.round(((previewStepIndex + 1) / total) * 100);
-
-    $('previewStepBadge').textContent = `STEP ${previewStepIndex + 1} OF ${total}`;
-    $('previewBannerText').textContent = stepObj.title;
-    $('previewProgressBar').style.width = `${pct}%`;
-    $('previewStepBody').textContent = stepObj.desc;
-
-    $('previewBackBtn').style.display = previewStepIndex > 0 ? 'inline-block' : 'none';
-    $('previewNextBtn').textContent = previewStepIndex < total - 1 ? 'Next Step →' : 'Run Tool ✓';
-  }
-
-  $('previewNextBtn').addEventListener('click', () => {
-    if (previewStepIndex < currentSteps.length - 1) {
-      previewStepIndex++;
-    } else {
-      previewStepIndex = 0;
-    }
-    updateInteractivePreview();
-  });
-
-  $('previewBackBtn').addEventListener('click', () => {
-    if (previewStepIndex > 0) {
-      previewStepIndex--;
-      updateInteractivePreview();
-    }
-  });
-
-  // Builds a 100% Pure-XAML Multi-Step Wizard (Steps advance via native WPF RadioButton + DataTrigger with zero Python lag)
-  function buildPureXamlMultiStepWizard(title, subtitle, steps, vars) {
+  // Exact Groot-Coloured pyRevit SelectFromList.xaml / ui.xaml template
+  function buildGrootSelectFromListXaml(title) {
     const safeTitle = escapeXml(title);
-    const safeSub = escapeXml(subtitle);
-    const s1 = steps[0] || { title: 'STEP 1: INPUT & SELECTION', desc: 'Select target elements.' };
-    const s2 = steps[1] || { title: 'STEP 2: CONFIGURE OPTIONS', desc: 'Review settings.' };
-    const s3 = steps[2] || { title: 'STEP 3: READY TO EXECUTE', desc: 'Click Run Tool to execute.' };
-
-    const extraControlsXaml = vars.length > 0
-      ? vars.map(v => {
-          if (v.type === 'CheckBox') {
-            return `                        <CheckBox x:Name="${escapeXml(v.name)}" Content="${escapeXml(v.label)}" IsChecked="${v.val}" Margin="0,4,0,6"/>`;
-          }
-          return `                        <TextBlock Text="${escapeXml(v.label)}" FontWeight="SemiBold" Foreground="#D2A16B" Margin="0,4,0,2"/>
-                        <TextBox x:Name="${escapeXml(v.name)}" Text="${escapeXml(v.val)}" Margin="0,0,0,8"/>`;
-        }).join('\n')
-      : `                        <CheckBox x:Name="purge_cb" Content="Validate active Revit view &amp; selection state" IsChecked="True" Margin="0,4,0,4"/>
-                        <CheckBox x:Name="workset_cb" Content="Preserve existing element &amp; sheet associations" IsChecked="True" Margin="0,4,0,4"/>`;
-
     return `<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="${safeTitle}" Height="460" Width="460"
+        Title="${safeTitle}"
+        Width="460" Height="500"
+        MinWidth="360" MinHeight="340"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
-        MinHeight="360" MinWidth="400"
         Background="#3B261A"
         Foreground="#F0D2A6"
-        FontFamily="Segoe UI">
-
+        FontFamily="Segoe UI"
+        PreviewKeyDown="handle_input_key">
     <Window.Resources>
-        <!-- Primary Groot Action Button -->
-        <Style x:Key="GrootBtn" TargetType="Button">
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="#F0D2A6"/>
+        </Style>
+
+        <Style TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#6F9E4D"/>
             <Setter Property="Foreground" Value="#140D09"/>
             <Setter Property="BorderBrush" Value="#D2A16B"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="14,7"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
 
-        <!-- Secondary Bark Button -->
-        <Style x:Key="GrootSubBtn" TargetType="Button" BasedOn="{StaticResource GrootBtn}">
+        <Style x:Key="ClearButton" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#24160F"/>
             <Setter Property="Foreground" Value="#D2A16B"/>
             <Setter Property="BorderBrush" Value="#8B5A35"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="10,5"/>
-        </Style>
-
-        <!-- Pure-XAML Step Wizard RadioButton Styled as a Button -->
-        <Style x:Key="GrootWizardRadioBtn" TargetType="RadioButton">
-            <Setter Property="Background" Value="#6F9E4D"/>
-            <Setter Property="Foreground" Value="#140D09"/>
-            <Setter Property="BorderBrush" Value="#D2A16B"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="14,7"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
 
-        <Style TargetType="TextBox">
+        <Style TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="#24160F"/>
             <Setter Property="Foreground" Value="#F0D2A6"/>
             <Setter Property="CaretBrush" Value="#D2A16B"/>
             <Setter Property="BorderBrush" Value="#8B5A35"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Padding" Value="6,4"/>
         </Style>
 
-        <Style TargetType="CheckBox">
-            <Setter Property="Foreground" Value="#F0D2A6"/>
-            <Setter Property="Margin" Value="0,4,0,4"/>
-        </Style>
-
-        <Style TargetType="ListBox">
+        <Style TargetType="{x:Type ListBox}">
             <Setter Property="Background" Value="#24160F"/>
             <Setter Property="Foreground" Value="#F0D2A6"/>
             <Setter Property="BorderBrush" Value="#8B5A35"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="4"/>
             <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
             <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
         </Style>
+
+        <Style TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="#F0D2A6"/>
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- Multi-Step Header Banner + Live Step Progress -->
-        <Border Grid.Row="0" Background="#24160F" BorderBrush="#6F9E4D" BorderThickness="4,0,0,0" CornerRadius="6" Padding="12,10" Margin="0,0,0,12">
-            <StackPanel>
-                <DockPanel Margin="0,0,0,4">
-                    <Border Background="#6F9E4D" CornerRadius="4" Padding="7,2" DockPanel.Dock="Right">
-                        <TextBlock x:Name="step_badge" FontSize="10" FontWeight="Bold" Foreground="#140D09">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="STEP 1 OF 3"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=step2_state, Path=IsChecked}" Value="True">
-                                            <Setter Property="Text" Value="STEP 2 OF 3"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=step3_state, Path=IsChecked}" Value="True">
-                                            <Setter Property="Text" Value="STEP 3 OF 3"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Border>
-                    <TextBlock x:Name="step_title" Text="${safeTitle.toUpperCase()}" FontSize="14" FontWeight="Bold" Foreground="#F0D2A6" TextTrimming="CharacterEllipsis"/>
-                </DockPanel>
-                <TextBlock x:Name="step_sub" Text="${safeSub}" FontSize="11.5" Foreground="#D2A16B" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                <ProgressBar x:Name="step_progress" Height="5" Minimum="0" Maximum="100" Background="#3B261A" Foreground="#6F9E4D" BorderBrush="#8B5A35">
-                    <ProgressBar.Style>
-                        <Style TargetType="ProgressBar">
-                            <Setter Property="Value" Value="33"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=step2_state, Path=IsChecked}" Value="True">
-                                    <Setter Property="Value" Value="66"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ElementName=step3_state, Path=IsChecked}" Value="True">
-                                    <Setter Property="Value" Value="100"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ProgressBar.Style>
-                </ProgressBar>
-            </StackPanel>
-        </Border>
-
-        <!-- Dynamic Step Body -->
-        <Grid Grid.Row="1">
-            <!-- Optional List Mode Panel (kept for compatibility with list scripts) -->
-            <Grid x:Name="panel_list" Visibility="Collapsed">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBox x:Name="search_tb" Grid.Row="0" Margin="0,0,0,8"/>
-                <ListBox x:Name="items_lb" Grid.Row="1" SelectionMode="Extended"/>
-                <StackPanel x:Name="multi_bar" Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
-                    <Button x:Name="sel_all_btn" Content="Select All" Style="{StaticResource GrootSubBtn}" Margin="0,0,8,0"/>
-                    <Button x:Name="sel_none_btn" Content="Select None" Style="{StaticResource GrootSubBtn}"/>
-                </StackPanel>
+    <DockPanel Margin="12" Background="#3B261A">
+        <!-- Search & Filter Bar -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <ToggleButton x:Name="regexToggle_b" DockPanel.Dock="Left"
+                          Width="30" Height="28" Margin="0,0,6,0"
+                          Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                          ToolTip="Toggle Regex / Filter Mode" Click="toggle_regex">
+                <TextBlock Text="A-Z" FontSize="10" FontWeight="Bold" Foreground="#D2A16B"/>
+            </ToggleButton>
+            <Grid>
+                <TextBox x:Name="search_tb" Height="28" VerticalContentAlignment="Center"/>
+                <Button x:Name="clrsearch_b" Visibility="Collapsed"
+                        HorizontalAlignment="Right" Width="22" Height="22" Margin="0,0,3,0"
+                        Content="x" Style="{StaticResource ClearButton}" Click="clear_search"/>
             </Grid>
-
-            <!-- Optional Input Mode Panel (kept for compatibility) -->
-            <StackPanel x:Name="panel_input" Visibility="Collapsed" VerticalAlignment="Top">
-                <TextBlock x:Name="input_prompt" Text="Enter value:" FontWeight="SemiBold" Margin="0,0,0,6" TextWrapping="Wrap"/>
-                <TextBox x:Name="input_tb" Margin="0,0,0,10"/>
-                <ComboBox x:Name="input_cb" Visibility="Collapsed" Margin="0,0,0,10" Padding="6,5"/>
-                <StackPanel x:Name="switches_sp" Margin="0,4,0,0"/>
-                <ListBox x:Name="switches_lb" Visibility="Collapsed" Height="180"/>
-            </StackPanel>
-
-            <!-- Multi-Step Wizard Panels (Works automatically via pure XAML triggers) -->
-            <ScrollViewer x:Name="panel_message" Visibility="Visible" VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <!-- STEP 1 PANEL -->
-                    <Border Background="#24160F" BorderBrush="#8B5A35" BorderThickness="1" CornerRadius="6" Padding="14">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=step1_state, Path=IsChecked}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <StackPanel>
-                            <TextBlock Text="${escapeXml(s1.title)}" FontWeight="Bold" FontSize="12.5" Foreground="#6F9E4D" Margin="0,0,0,6"/>
-                            <TextBlock x:Name="msg_tb" Text="${escapeXml(s1.desc)}" Foreground="#F0D2A6" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"/>
-                            <TextBlock Text="Filter / Prefix (Optional):" FontSize="11" Foreground="#D2A16B" Margin="0,0,0,4"/>
-                            <TextBox x:Name="prefix_tb" Text=""/>
-                            <StackPanel x:Name="params_sp" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- STEP 2 PANEL -->
-                    <Border Background="#24160F" BorderBrush="#8B5A35" BorderThickness="1" CornerRadius="6" Padding="14">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=step2_state, Path=IsChecked}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <StackPanel>
-                            <TextBlock Text="${escapeXml(s2.title)}" FontWeight="Bold" FontSize="12.5" Foreground="#6F9E4D" Margin="0,0,0,6"/>
-                            <TextBlock Text="${escapeXml(s2.desc)}" Foreground="#F0D2A6" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"/>
-${extraControlsXaml}
-                        </StackPanel>
-                    </Border>
-
-                    <!-- STEP 3 PANEL -->
-                    <Border Background="#24160F" BorderBrush="#6F9E4D" BorderThickness="1" CornerRadius="6" Padding="14">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=step3_state, Path=IsChecked}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <StackPanel>
-                            <TextBlock Text="${escapeXml(s3.title)}" FontWeight="Bold" FontSize="12.5" Foreground="#6F9E4D" Margin="0,0,0,6"/>
-                            <TextBlock Text="${escapeXml(s3.desc)}" Foreground="#F0D2A6" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"/>
-                            <Border Background="#3B261A" BorderBrush="#8B5A35" BorderThickness="1" CornerRadius="5" Padding="10">
-                                <StackPanel>
-                                    <TextBlock Text="✓ Step 1: Input &amp; selection verified" FontSize="11.5" Foreground="#F0D2A6" Margin="0,0,0,3"/>
-                                    <TextBlock Text="✓ Step 2: Tool options configured" FontSize="11.5" Foreground="#F0D2A6" Margin="0,0,0,3"/>
-                                    <TextBlock Text="✓ Step 3: Click 'Run Tool' below to execute in Revit" FontSize="11.5" Foreground="#6F9E4D" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
-
-        <!-- Multi-Step Footer Navigation -->
-        <DockPanel Grid.Row="2" Margin="0,14,0,0">
-            <TextBlock x:Name="footer_status" Text="Revit 2025 / 2026 / 2027" FontSize="11" Foreground="#D2A16B" VerticalAlignment="Center"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
-                <Button x:Name="no_btn" Content="No" Width="70" Margin="0,0,8,0" Visibility="Collapsed"
-                        Style="{StaticResource GrootSubBtn}"/>
-
-                <Button x:Name="cancel_btn" Content="Cancel" Width="80" Margin="0,0,8,0" IsCancel="True"
-                        Style="{StaticResource GrootSubBtn}" Click="cancel_click"/>
-
-                <!-- Step 1 Radio State (Visible as '<- Back' when on Step 2) -->
-                <RadioButton x:Name="step1_state" GroupName="GrootWizard" IsChecked="True" Content="&lt;- Back" Width="80" Margin="0,0,8,0">
-                    <RadioButton.Style>
-                        <Style TargetType="RadioButton" BasedOn="{StaticResource GrootWizardRadioBtn}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Setter Property="Background" Value="#24160F"/>
-                            <Setter Property="Foreground" Value="#D2A16B"/>
-                            <Setter Property="BorderBrush" Value="#8B5A35"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=step2_state, Path=IsChecked}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ElementName=panel_message, Path=Visibility}" Value="Collapsed">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Style>
-                </RadioButton>
-
-                <!-- Step 2 Radio State (Visible as 'Next Step ->' on Step 1, and '<- Back' on Step 3) -->
-                <RadioButton x:Name="step2_state" GroupName="GrootWizard">
-                    <RadioButton.Style>
-                        <Style TargetType="RadioButton" BasedOn="{StaticResource GrootWizardRadioBtn}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=step1_state, Path=IsChecked}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Setter Property="Content" Value="Next Step -&gt;"/>
-                                    <Setter Property="Background" Value="#6F9E4D"/>
-                                    <Setter Property="Foreground" Value="#140D09"/>
-                                    <Setter Property="BorderBrush" Value="#D2A16B"/>
-                                    <Setter Property="Width" Value="125"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ElementName=step3_state, Path=IsChecked}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Setter Property="Content" Value="&lt;- Back"/>
-                                    <Setter Property="Background" Value="#24160F"/>
-                                    <Setter Property="Foreground" Value="#D2A16B"/>
-                                    <Setter Property="BorderBrush" Value="#8B5A35"/>
-                                    <Setter Property="Width" Value="80"/>
-                                    <Setter Property="Margin" Value="0,0,8,0"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ElementName=panel_message, Path=Visibility}" Value="Collapsed">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Style>
-                </RadioButton>
-
-                <!-- Step 3 Radio State (Visible as 'Next Step ->' when on Step 2) -->
-                <RadioButton x:Name="step3_state" GroupName="GrootWizard" Content="Next Step -&gt;" Width="125">
-                    <RadioButton.Style>
-                        <Style TargetType="RadioButton" BasedOn="{StaticResource GrootWizardRadioBtn}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=step2_state, Path=IsChecked}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ElementName=panel_message, Path=Visibility}" Value="Collapsed">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Style>
-                </RadioButton>
-
-                <!-- Final Run Button (Visible on Step 3 or when in direct list/input mode) -->
-                <Button x:Name="run_btn" Content="Run Tool &#10003;" MinWidth="125" IsDefault="True" Click="run_click">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource GrootBtn}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=step3_state, Path=IsChecked}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ElementName=panel_message, Path=Visibility}" Value="Collapsed">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </StackPanel>
         </DockPanel>
-    </Grid>
+
+        <!-- Group Selector Dock -->
+        <DockPanel x:Name="ctx_groups_dock" DockPanel.Dock="Top" Margin="0,0,0,10" Visibility="Collapsed">
+            <TextBlock x:Name="ctx_groups_Title_tb" DockPanel.Dock="Left"
+                       VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#D2A16B" Text="List Group:"/>
+            <ComboBox x:Name="ctx_groups_selector_cb" Height="26" Background="#24160F" Foreground="#F0D2A6" BorderBrush="#8B5A35"/>
+        </DockPanel>
+
+        <!-- Bottom Action Buttons -->
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <Grid x:Name="checkboxbuttons_g" Margin="0,0,0,8" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="checkall_b" Grid.Column="0" Height="26" Margin="0,0,4,0"
+                        Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                        Content="Check" Click="button_checkall"/>
+                <Button x:Name="uncheckall_b" Grid.Column="1" Height="26" Margin="2,0,2,0"
+                        Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                        Content="Uncheck" Click="button_uncheckall"/>
+                <Button x:Name="toggleall_b" Grid.Column="2" Height="26" Margin="4,0,0,0"
+                        Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                        Content="Toggle" Click="button_toggleall"/>
+            </Grid>
+            <Button x:Name="select_b" Content="Select" Height="32"
+                    Background="#6F9E4D" Foreground="#140D09" BorderBrush="#D2A16B"
+                    FontWeight="Bold" IsDefault="True" Click="button_select"/>
+        </StackPanel>
+
+        <!-- Main ListBox -->
+        <ListBox x:Name="list_lb" BorderBrush="#8B5A35" BorderThickness="1" Background="#24160F" Foreground="#F0D2A6">
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Foreground" Value="#F0D2A6"/>
+                    <Setter Property="Padding" Value="6,4"/>
+                </Style>
+                <DataTemplate x:Key="DefaultItemTemplate">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox Content="{Binding name}" IsChecked="{Binding state}"
+                                  Foreground="#F0D2A6" VerticalAlignment="Center" Click="check_selected"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.Resources>
+        </ListBox>
+    </DockPanel>
 </Window>`;
   }
 
-  // 96x96 Groot-Coloured Operation Icon Renderer (From Reference Studio)
+  // Non-intrusive Groot Theme Styler: leaves 100% of pyRevit's native SelectFromList / WPFWindow logic intact
+  // while painting every window, search bar, list box, button, and alert in Groot colours.
+  function buildNonIntrusiveGrootThemeHookPy(cleanedCode, defaultTitle) {
+    const lines = cleanedCode.split(/\r?\n/);
+
+    let insertIdx = 0;
+    let inDocstring = false;
+    let docDelim = '';
+
+    for (let i = 0; i < lines.length; i++) {
+      const trimmed = lines[i].trim();
+      if (inDocstring) {
+        if (trimmed.includes(docDelim)) inDocstring = false;
+        insertIdx = i + 1;
+        continue;
+      }
+      if (i <= 5 && (trimmed.startsWith('"""') || trimmed.startsWith("'''"))) {
+        docDelim = trimmed.slice(0, 3);
+        if (!trimmed.slice(3).includes(docDelim)) inDocstring = true;
+        insertIdx = i + 1;
+        continue;
+      }
+      if (
+        trimmed === '' ||
+        trimmed.startsWith('#') ||
+        trimmed.startsWith('from __future__') ||
+        /^__[a-zA-Z0-9_]+__\s*=/.test(trimmed)
+      ) {
+        insertIdx = i + 1;
+      } else {
+        break;
+      }
+    }
+
+    const safeDefaultTitle = defaultTitle.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+    const themeHook = `# --- GROOT UI START ---
+# Groot Multi-Step Colour Theme Hook (Revit 2025 / 2026 / 2027)
+# Keeps 100% of native pyRevit SelectFromList & script logic untouched; skins every step in Groot colours.
+import clr as _groot_clr
+for _groot_asm in ("PresentationFramework", "PresentationCore", "WindowsBase"):
+    try:
+        _groot_clr.AddReference(_groot_asm)
+    except Exception:
+        pass
+
+import System.Windows as _GrootWin
+import System.Windows.Controls as _GrootCtrls
+import System.Windows.Controls.Primitives as _GrootPrims
+import System.Windows.Media as _GrootMedia
+import System.Windows.Shapes as _GrootShapes
+from pyrevit import forms as _groot_forms
+
+_groot_bc = _GrootMedia.BrushConverter()
+_BARK_BG = _groot_bc.ConvertFromString("#3B261A")
+_WOOD_BG = _groot_bc.ConvertFromString("#24160F")
+_BARK_BORDER = _groot_bc.ConvertFromString("#8B5A35")
+_WARM_WOOD = _groot_bc.ConvertFromString("#D2A16B")
+_LEAF_GREEN = _groot_bc.ConvertFromString("#6F9E4D")
+_CREAM_TEXT = _groot_bc.ConvertFromString("#F0D2A6")
+_DARK_TEXT = _groot_bc.ConvertFromString("#140D09")
+
+
+def _groot_paint_visual_tree(root_obj, depth=0):
+    if root_obj is None or depth > 18:
+        return
+    try:
+        if isinstance(root_obj, _GrootWin.Window):
+            root_obj.Background = _BARK_BG
+            root_obj.Foreground = _CREAM_TEXT
+        elif isinstance(root_obj, _GrootCtrls.ListBox):
+            root_obj.Background = _WOOD_BG
+            root_obj.Foreground = _CREAM_TEXT
+            root_obj.BorderBrush = _BARK_BORDER
+        elif isinstance(root_obj, _GrootCtrls.TextBox):
+            root_obj.Background = _WOOD_BG
+            root_obj.Foreground = _CREAM_TEXT
+            root_obj.CaretBrush = _WARM_WOOD
+            root_obj.BorderBrush = _BARK_BORDER
+        elif isinstance(root_obj, _GrootCtrls.ComboBox):
+            root_obj.Background = _WOOD_BG
+            root_obj.Foreground = _CREAM_TEXT
+            root_obj.BorderBrush = _BARK_BORDER
+        elif isinstance(root_obj, _GrootCtrls.Button):
+            nm = getattr(root_obj, "Name", "") or ""
+            is_primary = (nm in ("select_b", "run_btn", "ok_btn")) or bool(getattr(root_obj, "IsDefault", False))
+            if is_primary:
+                root_obj.Background = _LEAF_GREEN
+                root_obj.Foreground = _DARK_TEXT
+                root_obj.BorderBrush = _WARM_WOOD
+                root_obj.FontWeight = _GrootWin.FontWeights.Bold
+            else:
+                root_obj.Background = _WOOD_BG
+                root_obj.Foreground = _WARM_WOOD
+                root_obj.BorderBrush = _BARK_BORDER
+        elif isinstance(root_obj, _GrootPrims.ToggleButton) and not isinstance(root_obj, _GrootCtrls.CheckBox):
+            root_obj.Background = _WOOD_BG
+            root_obj.Foreground = _WARM_WOOD
+            root_obj.BorderBrush = _BARK_BORDER
+        elif isinstance(root_obj, (_GrootCtrls.CheckBox, _GrootCtrls.RadioButton, _GrootCtrls.Label, _GrootCtrls.ListBoxItem)):
+            root_obj.Foreground = _CREAM_TEXT
+        elif isinstance(root_obj, _GrootCtrls.TextBlock):
+            parent = _GrootMedia.VisualTreeHelper.GetParent(root_obj)
+            if not isinstance(parent, (_GrootCtrls.Button, _GrootCtrls.Border)):
+                root_obj.Foreground = _CREAM_TEXT
+        elif isinstance(root_obj, (_GrootCtrls.DockPanel, _GrootCtrls.Grid, _GrootCtrls.StackPanel)):
+            if getattr(root_obj, "Background", None) is not None:
+                root_obj.Background = _BARK_BG
+        elif isinstance(root_obj, _GrootShapes.Path):
+            root_obj.Fill = _WARM_WOOD
+    except Exception:
+        pass
+
+    try:
+        count = _GrootMedia.VisualTreeHelper.GetChildrenCount(root_obj)
+        for i in range(count):
+            child = _GrootMedia.VisualTreeHelper.GetChild(root_obj, i)
+            _groot_paint_visual_tree(child, depth + 1)
+    except Exception:
+        pass
+
+    try:
+        for lchild in _GrootWin.LogicalTreeHelper.GetChildren(root_obj):
+            if isinstance(lchild, _GrootWin.DependencyObject):
+                _groot_paint_visual_tree(lchild, depth + 1)
+    except Exception:
+        pass
+
+
+def _groot_on_window_loaded(sender, e):
+    try:
+        _groot_paint_visual_tree(sender, 0)
+        # Ensure primary button internal template border is Leaf Green in Revit 2025/2026/2027
+        for btn_name in ("select_b", "run_btn"):
+            btn = getattr(sender, btn_name, None)
+            if btn is not None:
+                btn.Background = _LEAF_GREEN
+                btn.Foreground = _DARK_TEXT
+                btn.BorderBrush = _WARM_WOOD
+                if _GrootMedia.VisualTreeHelper.GetChildrenCount(btn) > 0:
+                    bdr = _GrootMedia.VisualTreeHelper.GetChild(btn, 0)
+                    if isinstance(bdr, _GrootCtrls.Border):
+                        bdr.Background = _LEAF_GREEN
+                        bdr.BorderBrush = _WARM_WOOD
+                for tb in _GrootWin.LogicalTreeHelper.GetChildren(btn):
+                    if isinstance(tb, _GrootCtrls.TextBlock):
+                        tb.Foreground = _DARK_TEXT
+    except Exception:
+        pass
+
+
+_orig_wpf_init = _groot_forms.WPFWindow.__init__
+def _groot_wpf_init(self, *args, **kwargs):
+    _orig_wpf_init(self, *args, **kwargs)
+    try:
+        _groot_paint_visual_tree(self, 0)
+        self.Loaded += _groot_on_window_loaded
+        self.ContentRendered += _groot_on_window_loaded
+    except Exception:
+        pass
+
+_groot_forms.WPFWindow.__init__ = _groot_wpf_init
+# --- GROOT UI END ---`;
+
+    const topPart = lines.slice(0, insertIdx).join('\n');
+    const bottomPart = lines.slice(insertIdx).join('\n');
+
+    return (topPart ? topPart + '\n\n' : '') + themeHook + '\n\n' + bottomPart + '\n';
+  }
+
+  // 96x96 Groot-Coloured Operation Icon Renderer
   function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
 
   function drawIcon(art) {
@@ -810,19 +556,22 @@ ${extraControlsXaml}
     }
   });
 
-  // Download UI & Icon Only (Never outputs script.py)
+  // Download Buttons
   $('dlXamlBtn').addEventListener('click', () => downloadFile('ui.xaml', generatedXaml));
   $('dlIconBtn').addEventListener('click', () => {
     canvas.toBlob(blob => downloadFile('icon.png', blob, 'image/png'), 'image/png');
   });
+  $('dlPyBtn').addEventListener('click', () => downloadFile('script.py', generatedPy));
 
   $('dlZipBtn').addEventListener('click', async () => {
     const zip = new JSZip();
     zip.file('ui.xaml', generatedXaml);
+    zip.file('SelectFromList.xaml', generatedSelectFromListXaml);
+    zip.file('script.py', generatedPy);
     const pngBase64 = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
     zip.file('icon.png', pngBase64, { base64: true });
     const blob = await zip.generateAsync({ type: 'blob' });
-    downloadFile('groot_ui_and_icon.zip', blob, 'application/zip');
+    downloadFile('groot_every_step_files.zip', blob, 'application/zip');
   });
 
   // Download Website Files for GitHub Hosting
@@ -841,10 +590,9 @@ ${extraControlsXaml}
     downloadFile('style.css', css, 'text/css');
   });
   $('dlJsBtn').addEventListener('click', () => {
-    downloadFile('app.js', `${initGrootUIOnlyStudio.toString()}\ninitGrootUIOnlyStudio();\n`, 'text/javascript');
+    downloadFile('app.js', `${initGrootEveryStepStudio.toString()}\ninitGrootEveryStepStudio();\n`, 'text/javascript');
   });
 
-  drawIcon('view_transfer');
-  updateInteractivePreview();
+  drawIcon('tag_create');
 }
-initGrootUIOnlyStudio();
+initGrootEveryStepStudio();
