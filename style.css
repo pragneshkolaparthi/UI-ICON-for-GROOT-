@@ -79,7 +79,6 @@ header {
   border-radius: 99px;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.4px;
 }
 
 .v-pill.net-pill {
@@ -307,9 +306,9 @@ canvas {
 }
 
 .ui-mini-bar {
-  width: 65%;
   height: 100%;
   background: var(--leaf-green);
+  transition: width 0.2s ease;
 }
 
 .ui-mini-controls {
@@ -317,15 +316,18 @@ canvas {
   color: var(--warm-wood);
   margin-bottom: 10px;
   line-height: 1.35;
+  min-height: 32px;
 }
 
 .ui-mini-btns {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 6px;
 }
 
 .mini-cancel,
+.mini-back,
 .mini-run {
   font-size: 10.5px;
   padding: 4px 10px;
@@ -333,7 +335,8 @@ canvas {
   font-weight: 700;
 }
 
-.mini-cancel {
+.mini-cancel,
+.mini-back {
   background: #24160F;
   color: var(--warm-wood);
   border: 1px solid var(--bark-brown);
@@ -342,6 +345,7 @@ canvas {
 .mini-run {
   background: var(--leaf-green);
   color: #120b07;
+  border: 1px solid var(--warm-wood);
 }
 
 .download-buttons {
@@ -371,18 +375,18 @@ button:disabled {
   font-size: 14px;
 }
 
-.btn-grid {
+.btn-grid-two {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .btn-sub {
   background: #2b1c12;
   color: var(--cream);
   border: 1px solid var(--bark-brown);
-  padding: 10px;
-  font-size: 12.5px;
+  padding: 11px;
+  font-size: 13px;
 }
 
 .btn-sub:hover:not(:disabled) {
@@ -399,7 +403,8 @@ button:disabled {
 
 @media (max-width: 780px) {
   .two-windows,
-  .preview-strip {
+  .preview-strip,
+  .btn-grid-two {
     grid-template-columns: 1fr;
   }
 }
