@@ -53,19 +53,44 @@ body {
 }
 
 .shell {
-  max-width: 1040px;
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 32px 20px 60px;
+  padding: 28px 20px 60px;
 }
 
 header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
+}
+
+.version-pills {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.v-pill {
+  background: #261810;
+  color: var(--warm-wood);
+  border: 1px solid var(--bark-brown);
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.v-pill.net-pill {
+  background: #1f2e18;
+  color: var(--leaf-bright);
+  border-color: var(--leaf-green);
 }
 
 header h1 {
   margin: 0 0 6px;
-  font-size: 28px;
+  font-size: 27px;
   color: var(--cream);
 }
 
@@ -126,7 +151,7 @@ header p {
   border: 2px dashed var(--bark-brown);
   border-radius: 14px;
   background: #261810;
-  padding: 38px 20px;
+  padding: 36px 20px;
   text-align: center;
   cursor: pointer;
   transition: 0.18s;
@@ -186,12 +211,13 @@ input[type="file"] {
 .status-row {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: 12.5px;
   gap: 10px;
 }
 
 .status-label {
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .status-row strong {
@@ -201,7 +227,7 @@ input[type="file"] {
 
 .preview-strip {
   display: grid;
-  grid-template-columns: 130px 1fr;
+  grid-template-columns: 125px 1fr;
   gap: 14px;
   align-items: center;
   background: #150d08;
@@ -242,6 +268,18 @@ canvas {
   font-size: 11px;
   font-weight: 700;
   padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-pill {
+  background: var(--leaf-green);
+  color: #120b07;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 99px;
 }
 
 .ui-mini-body {
@@ -251,18 +289,34 @@ canvas {
 .ui-mini-banner {
   background: #281910;
   border-left: 3px solid var(--leaf-green);
-  padding: 6px 8px;
-  font-size: 11.5px;
+  padding: 5px 8px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--cream);
   border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.ui-mini-progress {
+  height: 5px;
+  background: #23150e;
+  border-radius: 4px;
+  overflow: hidden;
   margin-bottom: 8px;
+  border: 1px solid #593822;
+}
+
+.ui-mini-bar {
+  width: 65%;
+  height: 100%;
+  background: var(--leaf-green);
 }
 
 .ui-mini-controls {
   font-size: 11px;
   color: var(--warm-wood);
   margin-bottom: 10px;
+  line-height: 1.35;
 }
 
 .ui-mini-btns {
