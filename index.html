@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>pyRevit Groot UI & Icon Generator (Lightweight & Safe)</title>
+  <title>pyRevit Groot UI & Icon Generator (Revit 2025 / 2026 / 2027)</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-  <!-- Direct Download Bar for GitHub Hosting Files -->
+  <!-- Direct Download Bar for GitHub Website Hosting Files -->
   <div class="site-files-bar">
     <span>GitHub Website Files:</span>
     <button type="button" id="dlHtmlBtn">↓ index.html</button>
@@ -21,10 +21,10 @@
       <div class="version-pills">
         <span class="v-pill">Revit 2025 / 2026 / 2027</span>
         <span class="v-pill net-pill">Zero RAM Overhead</span>
-        <span class="v-pill net-pill">100% Non-Destructive UI</span>
+        <span class="v-pill net-pill">Outputs Only ui.xaml &amp; icon.png</span>
       </div>
       <h1>pyRevit Groot Multi-Step UI &amp; Icon Generator</h1>
-      <p>Upload your <code>script.py</code> &rarr; Download lightweight, read-only Groot UI files &amp; 96&times;96 icon</p>
+      <p>Upload your <code>script.py</code> &rarr; Download <code>ui.xaml</code> &amp; <code>icon.png</code> (your <code>script.py</code> stays untouched)</p>
     </header>
 
     <main class="two-windows">
@@ -32,7 +32,7 @@
       <section class="window-card">
         <div class="window-head">
           <h2>1. Upload Window</h2>
-          <span>script.py</span>
+          <span>Read-Only Script Reader</span>
         </div>
         <div class="window-body">
           <div class="dropzone" id="dropzone" role="button" tabindex="0">
@@ -54,15 +54,15 @@
             </div>
             <div class="status-row">
               <span class="status-label">Detected Operation:</span>
-              <strong id="detectedOpText">Waiting for file...</strong>
+              <strong id="detectedOpText">Waiting for script.py...</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">UI Step Mode:</span>
-              <strong id="detectedStepsText">Smooth Next-Step flow across all dialogs</strong>
+              <span class="status-label">Detected Script Steps:</span>
+              <strong id="detectedStepsText">Step 1 (Select) &rarr; Step 2 (Process) &rarr; Step 3 (Execute)</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">Safety &amp; Memory:</span>
-              <strong>Read-Only UI (Zero Revit DB or PC changes)</strong>
+              <span class="status-label">Safety &amp; RAM:</span>
+              <strong>100% Read-Only UI &middot; Zero Revit/PC Changes</strong>
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@
       <section class="window-card">
         <div class="window-head">
           <h2>2. Download Window</h2>
-          <span>Ready for .pushbutton folder</span>
+          <span>ui.xaml + icon.png Only</span>
         </div>
         <div class="window-body">
           <div class="preview-strip">
@@ -81,20 +81,24 @@
               <span>icon.png (96&times;96)</span>
             </div>
 
+            <!-- Interactive Multi-Step Preview -->
             <div class="ui-mini-preview">
               <div class="ui-mini-titlebar">
                 <span id="previewWindowTitle">Revit Tool</span>
-                <span class="step-pill">LIGHTWEIGHT UI</span>
+                <span class="step-pill" id="previewStepBadge">STEP 1 OF 3</span>
               </div>
               <div class="ui-mini-body">
-                <div class="ui-mini-banner" id="previewBannerText">GROOT STEP DIALOG</div>
-                <div class="ui-mini-progress"><div class="ui-mini-bar"></div></div>
-                <div class="ui-mini-controls" id="previewControlsInfo">
-                  Advances immediately on Next Step click &middot; Zero RAM lag
+                <div class="ui-mini-banner" id="previewBannerText">STEP 1: INPUT &amp; SELECTION</div>
+                <div class="ui-mini-progress">
+                  <div class="ui-mini-bar" id="previewProgressBar" style="width: 33%;"></div>
+                </div>
+                <div class="ui-mini-controls" id="previewStepBody">
+                  Upload script.py to test the Next Step flow here and in Revit.
                 </div>
                 <div class="ui-mini-btns">
+                  <button type="button" class="mini-back" id="previewBackBtn" style="display:none;">&larr; Back</button>
                   <span class="mini-cancel">Cancel</span>
-                  <span class="mini-run">Next Step &rarr;</span>
+                  <button type="button" class="mini-run" id="previewNextBtn">Next Step &rarr;</button>
                 </div>
               </div>
             </div>
@@ -102,15 +106,14 @@
 
           <div class="download-buttons">
             <button class="btn-main" id="dlZipBtn" type="button" disabled>
-              ⬇ Download All Files (.ZIP)
+              ⬇ Download UI &amp; Icon (.ZIP)
             </button>
-            <div class="btn-grid">
-              <button class="btn-sub" id="dlPyBtn" type="button" disabled>↓ script.py</button>
-              <button class="btn-sub" id="dlXamlBtn" type="button" disabled>↓ ui.xaml</button>
-              <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ icon.png</button>
+            <div class="btn-grid-two">
+              <button class="btn-sub" id="dlXamlBtn" type="button" disabled>↓ Download ui.xaml</button>
+              <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ Download icon.png</button>
             </div>
           </div>
-          <p class="helper-note">Place <code>script.py</code>, <code>ui.xaml</code>, and <code>icon.png</code> into your <code>.pushbutton</code> folder. Does not alter Revit model data or PC files.</p>
+          <p class="helper-note">Downloads <strong>only</strong> <code>ui.xaml</code> and <code>icon.png</code>. Your existing <code>script.py</code> and Revit model are never modified.</p>
         </div>
       </section>
     </main>
