@@ -1,6 +1,9 @@
+window.__GROOT_STUDIO_READY__ = true;
+
 function initGrootEveryStepStudio() {
   const $ = id => document.getElementById(id);
-  const canvas = $('iconCanvas'), ctx = canvas.getContext('2d');
+  const canvas = $('iconCanvas');
+  const ctx = canvas.getContext('2d');
 
   let generatedXaml = '';
   let generatedSelectFromListXaml = '';
@@ -82,8 +85,18 @@ function initGrootEveryStepStudio() {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  function extractMatches(text, regex) {
+    const out = [];
+    let m;
+    while ((m = regex.exec(text)) !== null) {
+      out.push(m[1]);
+    }
+    return out;
+  }
+
   function processUploadedScript(text, fileName) {
-    // Strip any previous Groot block cleanly
+    if (!text || !text.trim()) return;
+
     let cleanedCode = text.replace(/# --- GROOT UI START ---[\s\S]*?# --- GROOT UI END ---\r?\n?/g, '');
     cleanedCode = cleanedCode.replace(/\n# Apply Step 1 Groot UI parameter values[\s\S]*$/g, '');
     cleanedCode = cleanedCode.replace(/\n_groot_show_final_summary\(\)\s*$/g, '');
@@ -91,21 +104,22 @@ function initGrootEveryStepStudio() {
     const opKey = detectOperationKey(cleanedCode);
     const opProfile = operationProfiles[opKey] || operationProfiles.parameter_update;
 
-    // Extract step titles from the user's script (e.g. title="Step 1: Select Generic Annotation to Place")
-    const stepTitles = [...cleanedCode.matchAll(/title\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
-    const btnNames = [...cleanedCode.matchAll(/button_name\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
+    const stepTitles = extractMatches(cleanedCode, /title\s*=\s*["']([^"']+)["']/g);
+    const btnNames = extractMatches(cleanedCode, /button_name\s*=\s*["']([^"']+)["']/g);
 
     const firstStepTitle = stepTitles[0] || opProfile.title;
     const firstBtnName = btnNames[0] || 'Select & Continue ->';
 
     generatedSelectFromListXaml = buildGrootSelectFromListXaml(firstStepTitle);
     generatedXaml = generatedSelectFromListXaml;
-    generatedPy = buildNonIntrusiveGrootThemeHookPy(cleanedCode, firstStepTitle);
+    generatedPy = buildNonIntrusiveGrootThemeHookPy(cleanedCode);
 
+    $('dropTitle').textContent = '✓ Loaded: ' + fileName;
+    $('dropSub').textContent = 'Ready! Download your Groot UI files on the right ->';
     $('fileNameText').textContent = fileName;
     $('detectedOpText').textContent = opProfile.title;
     $('detectedStepsText').textContent = stepTitles.length > 0
-      ? `${stepTitles.length} Step(s) (${stepTitles.slice(0, 3).join(' → ')})`
+      ? stepTitles.length + ' Step(s) (' + stepTitles.slice(0, 3).join(' -> ') + ')'
       : 'All SelectFromList, Input, Switch & Alert steps';
 
     $('previewWindowTitle').textContent = firstStepTitle;
@@ -118,7 +132,6 @@ function initGrootEveryStepStudio() {
     });
   }
 
-  // Exact Groot-Coloured pyRevit SelectFromList.xaml / ui.xaml template
   function buildGrootSelectFromListXaml(title) {
     const safeTitle = escapeXml(title);
     return `<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -136,7 +149,6 @@ function initGrootEveryStepStudio() {
         <Style TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="#F0D2A6"/>
         </Style>
-
         <Style TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#6F9E4D"/>
             <Setter Property="Foreground" Value="#140D09"/>
@@ -145,14 +157,12 @@ function initGrootEveryStepStudio() {
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
-
         <Style x:Key="ClearButton" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#24160F"/>
             <Setter Property="Foreground" Value="#D2A16B"/>
             <Setter Property="BorderBrush" Value="#8B5A35"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
-
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="#24160F"/>
             <Setter Property="Foreground" Value="#F0D2A6"/>
@@ -161,7 +171,6 @@ function initGrootEveryStepStudio() {
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="6,4"/>
         </Style>
-
         <Style TargetType="{x:Type ListBox}">
             <Setter Property="Background" Value="#24160F"/>
             <Setter Property="Foreground" Value="#F0D2A6"/>
@@ -170,14 +179,12 @@ function initGrootEveryStepStudio() {
             <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
             <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
         </Style>
-
         <Style TargetType="{x:Type CheckBox}">
             <Setter Property="Foreground" Value="#F0D2A6"/>
         </Style>
     </Window.Resources>
 
     <DockPanel Margin="12" Background="#3B261A">
-        <!-- Search & Filter Bar -->
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
             <ToggleButton x:Name="regexToggle_b" DockPanel.Dock="Left"
                           Width="30" Height="28" Margin="0,0,6,0"
@@ -193,14 +200,12 @@ function initGrootEveryStepStudio() {
             </Grid>
         </DockPanel>
 
-        <!-- Group Selector Dock -->
         <DockPanel x:Name="ctx_groups_dock" DockPanel.Dock="Top" Margin="0,0,0,10" Visibility="Collapsed">
             <TextBlock x:Name="ctx_groups_Title_tb" DockPanel.Dock="Left"
                        VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#D2A16B" Text="List Group:"/>
             <ComboBox x:Name="ctx_groups_selector_cb" Height="26" Background="#24160F" Foreground="#F0D2A6" BorderBrush="#8B5A35"/>
         </DockPanel>
 
-        <!-- Bottom Action Buttons -->
         <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
             <Grid x:Name="checkboxbuttons_g" Margin="0,0,0,8" Visibility="Collapsed">
                 <Grid.ColumnDefinitions>
@@ -223,7 +228,6 @@ function initGrootEveryStepStudio() {
                     FontWeight="Bold" IsDefault="True" Click="button_select"/>
         </StackPanel>
 
-        <!-- Main ListBox -->
         <ListBox x:Name="list_lb" BorderBrush="#8B5A35" BorderThickness="1" Background="#24160F" Foreground="#F0D2A6">
             <ListBox.Resources>
                 <Style TargetType="{x:Type ListBoxItem}">
@@ -242,11 +246,8 @@ function initGrootEveryStepStudio() {
 </Window>`;
   }
 
-  // Non-intrusive Groot Theme Styler: leaves 100% of pyRevit's native SelectFromList / WPFWindow logic intact
-  // while painting every window, search bar, list box, button, and alert in Groot colours.
-  function buildNonIntrusiveGrootThemeHookPy(cleanedCode, defaultTitle) {
+  function buildNonIntrusiveGrootThemeHookPy(cleanedCode) {
     const lines = cleanedCode.split(/\r?\n/);
-
     let insertIdx = 0;
     let inDocstring = false;
     let docDelim = '';
@@ -275,8 +276,6 @@ function initGrootEveryStepStudio() {
         break;
       }
     }
-
-    const safeDefaultTitle = defaultTitle.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
     const themeHook = `# --- GROOT UI START ---
 # Groot Multi-Step Colour Theme Hook (Revit 2025 / 2026 / 2027)
@@ -374,7 +373,6 @@ def _groot_paint_visual_tree(root_obj, depth=0):
 def _groot_on_window_loaded(sender, e):
     try:
         _groot_paint_visual_tree(sender, 0)
-        # Ensure primary button internal template border is Leaf Green in Revit 2025/2026/2027
         for btn_name in ("select_b", "run_btn"):
             btn = getattr(sender, btn_name, None)
             if btn is not None:
@@ -412,8 +410,16 @@ _groot_forms.WPFWindow.__init__ = _groot_wpf_init
     return (topPart ? topPart + '\n\n' : '') + themeHook + '\n\n' + bottomPart + '\n';
   }
 
-  // 96x96 Groot-Coloured Operation Icon Renderer
-  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+  // Universal rounded-rectangle helper (works in all browsers even if ctx.roundRect is missing)
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
 
   function drawIcon(art) {
     const dark = '#3B261A', bark = '#8B5A35', tan = '#D2A16B', green = '#6F9E4D', cream = '#F0D2A6';
@@ -529,32 +535,38 @@ _groot_forms.WPFWindow.__init__ = _groot_wpf_init
     a.click();
   }
 
-  // Upload events
-  $('dropzone').addEventListener('click', () => $('fileInput').click());
-  $('fileInput').addEventListener('change', e => {
-    const file = e.target.files[0];
+  // Native File Input Overlay Events (Resets value on click so same file can be uploaded repeatedly)
+  const fileInput = $('fileInput');
+  fileInput.addEventListener('click', () => {
+    fileInput.value = '';
+  });
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => processUploadedScript(String(reader.result || ''), file.name);
+    reader.onload = () => {
+      const txt = String(reader.result || '');
+      $('pasteInput').value = txt;
+      processUploadedScript(txt, file.name);
+    };
     reader.readAsText(file);
   });
 
-  ['dragenter', 'dragover'].forEach(ev => $('dropzone').addEventListener(ev, e => {
-    e.preventDefault();
-    $('dropzone').classList.add('drag');
-  }));
-  ['dragleave', 'drop'].forEach(ev => $('dropzone').addEventListener(ev, e => {
-    e.preventDefault();
-    $('dropzone').classList.remove('drag');
-  }));
-  $('dropzone').addEventListener('drop', e => {
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => processUploadedScript(String(reader.result || ''), file.name);
-      reader.readAsText(file);
+  // Fallback Paste Box Listener
+  $('pasteInput').addEventListener('input', e => {
+    const txt = e.target.value;
+    if (txt && txt.trim()) {
+      processUploadedScript(txt, 'script.py (Pasted)');
     }
   });
+
+  ['dragenter', 'dragover'].forEach(ev => $('dropzone').addEventListener(ev, () => {
+    $('dropzone').classList.add('drag');
+  }));
+  ['dragleave', 'drop'].forEach(ev => $('dropzone').addEventListener(ev, () => {
+    $('dropzone').classList.remove('drag');
+  }));
 
   // Download Buttons
   $('dlXamlBtn').addEventListener('click', () => downloadFile('ui.xaml', generatedXaml));
@@ -564,6 +576,12 @@ _groot_forms.WPFWindow.__init__ = _groot_wpf_init
   $('dlPyBtn').addEventListener('click', () => downloadFile('script.py', generatedPy));
 
   $('dlZipBtn').addEventListener('click', async () => {
+    if (typeof JSZip === 'undefined') {
+      downloadFile('ui.xaml', generatedXaml);
+      downloadFile('script.py', generatedPy);
+      canvas.toBlob(blob => downloadFile('icon.png', blob, 'image/png'), 'image/png');
+      return;
+    }
     const zip = new JSZip();
     zip.file('ui.xaml', generatedXaml);
     zip.file('SelectFromList.xaml', generatedSelectFromListXaml);
@@ -590,7 +608,7 @@ _groot_forms.WPFWindow.__init__ = _groot_wpf_init
     downloadFile('style.css', css, 'text/css');
   });
   $('dlJsBtn').addEventListener('click', () => {
-    downloadFile('app.js', `${initGrootEveryStepStudio.toString()}\ninitGrootEveryStepStudio();\n`, 'text/javascript');
+    downloadFile('app.js', `window.__GROOT_STUDIO_READY__ = true;\n${initGrootEveryStepStudio.toString()}\ninitGrootEveryStepStudio();\n`, 'text/javascript');
   });
 
   drawIcon('tag_create');
