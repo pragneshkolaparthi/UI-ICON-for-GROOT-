@@ -4,31 +4,52 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>pyRevit Groot Multi-Step UI & Icon Generator</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    /* Built-in fallback styles so index.html works even if style.css is missing */
     :root {
-      --bg: #120b07; --panel: #1f140d; --line: #4b3120; --muted: #b59b82;
-      --text: #f5e6d3; --dark-bark: #3B261A; --bark-brown: #8B5A35;
-      --warm-wood: #D2A16B; --leaf-green: #6F9E4D; --leaf-bright: #9ce57f; --cream: #F0D2A6;
+      --bg: #120b07;
+      --panel: #1f140d;
+      --line: #4b3120;
+      --muted: #b59b82;
+      --text: #f5e6d3;
+      --dark-bark: #3B261A;
+      --bark-brown: #8B5A35;
+      --warm-wood: #D2A16B;
+      --leaf-green: #6F9E4D;
+      --leaf-bright: #9ce57f;
+      --cream: #F0D2A6;
     }
     * { box-sizing: border-box; }
     body {
-      margin: 0; color: var(--text); min-height: 100vh;
-      background: radial-gradient(ellipse at 15% 0%, #3b261a 0, transparent 40%), linear-gradient(145deg, #100a06, #1c110b 65%, #120b07);
+      margin: 0;
+      background: radial-gradient(ellipse at 15% 0%, #3b261a 0, transparent 40%),
+                  linear-gradient(145deg, #100a06, #1c110b 65%, #120b07);
+      color: var(--text);
       font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+      min-height: 100vh;
     }
     .site-files-bar {
-      background: #180f0a; border-bottom: 1px solid var(--line); padding: 8px 20px;
-      display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 12px; color: var(--warm-wood);
+      background: #180f0a;
+      border-bottom: 1px solid var(--line);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--warm-wood);
     }
     .site-files-bar button {
-      background: #2b1c12; color: var(--cream); border: 1px solid var(--bark-brown);
-      border-radius: 6px; padding: 4px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+      background: #2b1c12;
+      color: var(--cream);
+      border: 1px solid var(--bark-brown);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
     }
-    .shell { max-width: 1060px; margin: 0 auto; padding: 26px 20px 60px; }
-    header { text-align: center; margin-bottom: 24px; }
+    .shell { max-width: 1080px; margin: 0 auto; padding: 24px 20px 60px; }
+    header { text-align: center; margin-bottom: 22px; }
     .version-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
     .v-pill {
       background: #261810; color: var(--warm-wood); border: 1px solid var(--bark-brown);
@@ -36,58 +57,94 @@
     }
     .v-pill.net-pill { background: #1f2e18; color: var(--leaf-bright); border-color: var(--leaf-green); }
     header h1 { margin: 0 0 6px; font-size: 26px; color: var(--cream); }
-    header p { margin: 0; color: var(--muted); font-size: 14px; }
+    header p { margin: 0; color: var(--muted); font-size: 13.5px; }
     .two-windows { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: stretch; }
     .window-card {
-      background: linear-gradient(160deg, #24170ff5, #180f0af8); border: 1px solid var(--line);
-      border-radius: 18px; box-shadow: 0 16px 45px rgba(0,0,0,0.55); display: flex; flex-direction: column; overflow: hidden;
+      background: linear-gradient(160deg, #24170ff5, #180f0af8);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     .window-head {
-      padding: 15px 20px; border-bottom: 1px solid var(--line);
-      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .window-head h2 { margin: 0; font-size: 16px; color: var(--cream); }
     .window-head span { font-size: 11px; color: var(--warm-wood); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
     .window-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+
     .dropzone {
-      position: relative; border: 2px dashed var(--leaf-green); border-radius: 14px;
-      background: #261810; padding: 28px 18px; text-align: center; cursor: pointer; transition: 0.18s;
+      display: block;
+      border: 2px dashed var(--leaf-green);
+      border-radius: 14px;
+      background: #261810;
+      padding: 24px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.18s;
     }
     .dropzone:hover, .dropzone.drag { border-color: var(--leaf-bright); background: #312015; }
-    /* Full-box native file input overlay so clicking or dragging NEVER fails */
-    .file-overlay {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      opacity: 0; cursor: pointer; z-index: 5;
-    }
     .upload-icon {
-      width: 48px; height: 48px; border-radius: 13px; background: var(--dark-bark);
-      color: var(--leaf-bright); border: 1px solid var(--leaf-green);
+      width: 46px; height: 46px; border-radius: 12px;
+      background: var(--dark-bark); color: var(--leaf-bright);
+      border: 1px solid var(--leaf-green);
       display: grid; place-items: center; margin: 0 auto 10px;
     }
     .dropzone strong { display: block; font-size: 15.5px; color: var(--cream); margin-bottom: 4px; }
-    .dropzone p { margin: 0; color: var(--muted); font-size: 12.5px; }
-    .browse { color: var(--leaf-bright); text-decoration: underline; font-weight: 700; }
-    .paste-box { display: flex; flex-direction: column; gap: 6px; }
-    .paste-box label { font-size: 11.5px; color: var(--warm-wood); font-weight: 700; }
-    .paste-box textarea {
-      width: 100%; height: 74px; background: #150d08; color: var(--cream);
-      border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
-      font: 12px/1.4 Consolas, monospace; resize: vertical; outline: none;
+    .dropzone p { margin: 0 0 12px; color: var(--muted); font-size: 12.5px; }
+    .native-file-input {
+      display: inline-block;
+      max-width: 100%;
+      background: #180f0a;
+      color: var(--cream);
+      border: 1px solid var(--bark-brown);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
     }
-    .paste-box textarea:focus { border-color: var(--leaf-green); }
+    .native-file-input::file-selector-button {
+      background: var(--leaf-green);
+      color: #120b07;
+      border: 1px solid var(--warm-wood);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-weight: 800;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
     .status-box {
-      background: #150d08; border: 1px solid var(--line); border-radius: 12px;
-      padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;
+      background: #150d08;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
     .status-row { display: flex; justify-content: space-between; font-size: 12.5px; gap: 10px; }
     .status-label { color: var(--muted); white-space: nowrap; }
     .status-row strong { color: var(--cream); text-align: right; }
+
     .preview-strip {
-      display: grid; grid-template-columns: 116px 1fr; gap: 14px; align-items: center;
-      background: #150d08; border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+      display: grid;
+      grid-template-columns: 116px 1fr;
+      gap: 14px;
+      align-items: center;
+      background: #150d08;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
     }
     .icon-holder { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    canvas { width: 96px; height: 96px; border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+    canvas { width: 96px; height: 96px; border-radius: 18px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); }
     .icon-holder span { font-size: 11px; color: var(--muted); }
     .ui-mini-preview { background: var(--dark-bark); border: 1.5px solid var(--bark-brown); border-radius: 8px; overflow: hidden; }
     .ui-mini-titlebar {
@@ -108,35 +165,33 @@
       width: 100%; text-align: center; font-size: 11px; padding: 5px 10px;
       border-radius: 4px; font-weight: 800; background: var(--leaf-green); color: #120b07; border: 1px solid var(--warm-wood);
     }
-    .download-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .download-buttons { display: flex; flex-direction: column; gap: 8px; }
     button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; font-weight: 750; transition: 0.15s; }
     button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-main { background: linear-gradient(100deg, var(--leaf-bright), var(--leaf-green)); color: #10210d; padding: 14px; font-size: 14px; }
+    .btn-main { background: linear-gradient(100deg, var(--leaf-bright), var(--leaf-green)); color: #10210d; padding: 12px; font-size: 13.5px; }
+    .btn-grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .btn-grid-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .btn-sub { background: #2b1c12; color: var(--cream); border: 1px solid var(--bark-brown); padding: 10px 8px; font-size: 12px; }
+    .btn-sub { background: #2b1c12; color: var(--cream); border: 1px solid var(--bark-brown); padding: 9px 8px; font-size: 12px; }
     .btn-sub:hover:not(:disabled) { border-color: var(--leaf-bright); background: var(--dark-bark); }
-    .helper-note { margin: 0; font-size: 11.5px; color: var(--muted); text-align: center; }
-    @media (max-width: 780px) { .two-windows, .preview-strip, .btn-grid-three { grid-template-columns: 1fr; } }
+    .helper-note { margin: 0; font-size: 11px; color: var(--muted); text-align: center; }
+    @media (max-width: 780px) { .two-windows, .preview-strip, .btn-grid-two, .btn-grid-three { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <!-- Direct Download Bar for GitHub Website Hosting Files -->
   <div class="site-files-bar">
-    <span>GitHub Website Files:</span>
-    <button type="button" id="dlHtmlBtn">↓ index.html</button>
-    <button type="button" id="dlCssBtn">↓ style.css</button>
-    <button type="button" id="dlJsBtn">↓ app.js</button>
+    <span>GitHub Website File:</span>
+    <button type="button" id="dlHtmlBtn">↓ Download index.html</button>
   </div>
 
   <div class="shell">
     <header>
       <div class="version-pills">
         <span class="v-pill">Revit 2025 / 2026 / 2027</span>
-        <span class="v-pill net-pill">Themes Every Step in Groot Colours</span>
+        <span class="v-pill net-pill">100% Public pyRevit API (Zero DLL Block)</span>
         <span class="v-pill net-pill">Zero RAM Overhead</span>
       </div>
       <h1>pyRevit Groot Multi-Step UI &amp; Icon Generator</h1>
-      <p>Upload or paste your <code>script.py</code> &rarr; Colors <strong>every step</strong> in Groot colours</p>
+      <p>Uses standard public <code>pyrevit.forms</code> XAML only &mdash; never triggers Windows Security or white screen</p>
     </header>
 
     <main class="two-windows">
@@ -144,39 +199,37 @@
       <section class="window-card">
         <div class="window-head">
           <h2>1. Upload Window</h2>
-          <span>Upload or Paste script.py</span>
+          <span>UPLOAD SCRIPT.PY</span>
         </div>
         <div class="window-body">
-          <div class="dropzone" id="dropzone">
-            <!-- Native full-overlay file input: clicking or dragging here ALWAYS works -->
-            <input id="fileInput" class="file-overlay" type="file" title="Click or drop your script.py file here" />
+          <label for="fileInput" class="dropzone" id="dropzone">
             <div class="upload-icon">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 16V4m-5 5 5-5 5 5"/>
                 <path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/>
               </svg>
             </div>
-            <strong id="dropTitle">Click here or drop your script.py</strong>
-            <p id="dropSub">Accepts any <span class="browse">.py script file</span> directly from your PC</p>
-          </div>
-
-          <div class="paste-box">
-            <label for="pasteInput">Or paste your script.py code directly below:</label>
-            <textarea id="pasteInput" placeholder="# Paste your pyRevit Python script here if you prefer not to browse..."></textarea>
-          </div>
+            <strong id="dropTitle">Drop your pyRevit script.py here</strong>
+            <p id="dropSub">or click Choose File below</p>
+            <input id="fileInput" class="native-file-input" type="file" />
+          </label>
 
           <div class="status-box">
             <div class="status-row">
-              <span class="status-label">Loaded Script:</span>
-              <strong id="fileNameText">Waiting for upload or paste...</strong>
+              <span class="status-label">Uploaded Script:</span>
+              <strong id="fileNameText">None</strong>
             </div>
             <div class="status-row">
               <span class="status-label">Detected Operation:</span>
-              <strong id="detectedOpText">Auto-detect ready</strong>
+              <strong id="detectedOpText">Waiting for script.py...</strong>
             </div>
             <div class="status-row">
-              <span class="status-label">Groot Colour Coverage:</span>
-              <strong id="detectedStepsText">Every Step (SelectFromList, Inputs, Switches &amp; Alerts)</strong>
+              <span class="status-label">Detected Steps:</span>
+              <strong id="detectedStepsText">All SelectFromList steps in script</strong>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Windows Security Safe:</span>
+              <strong>Uses 100% Public pyRevit XAML (Zero CLR/DLL hooks)</strong>
             </div>
           </div>
         </div>
@@ -186,7 +239,7 @@
       <section class="window-card">
         <div class="window-head">
           <h2>2. Download Window</h2>
-          <span>Groot UI Files &amp; Icon</span>
+          <span>PUBLIC XAML &amp; ICON</span>
         </div>
         <div class="window-body">
           <div class="preview-strip">
@@ -195,11 +248,10 @@
               <span>icon.png (96&times;96)</span>
             </div>
 
-            <!-- Groot-Coloured SelectFromList Step Preview -->
             <div class="ui-mini-preview">
               <div class="ui-mini-titlebar">
                 <span id="previewWindowTitle">Step 1: Select Generic Annotation</span>
-                <span class="step-pill">GROOT THEME</span>
+                <span class="step-pill">PUBLIC XAML</span>
               </div>
               <div class="ui-mini-body">
                 <div class="ui-mini-search">
@@ -208,7 +260,7 @@
                 </div>
                 <div class="ui-mini-list">
                   <div class="mini-list-item selected">RSP-Room No_1,75-12SA</div>
-                  <div class="mini-list-item">Every Step in Groot Bark &amp; Moss Colours</div>
+                  <div class="mini-list-item">Groot Bark &amp; Moss Public XAML</div>
                 </div>
                 <div class="ui-mini-btns">
                   <span class="mini-run" id="previewBtnText">Select Annotation &rarr;</span>
@@ -218,29 +270,500 @@
           </div>
 
           <div class="download-buttons">
-            <button class="btn-main" id="dlZipBtn" type="button" disabled>
-              ⬇ Download All Files (.ZIP)
-            </button>
+            <!-- Copy buttons avoid Windows Mark-of-the-Web completely -->
+            <div class="btn-grid-two">
+              <button class="btn-main" id="copyXamlBtn" type="button" disabled>📋 Copy ui.xaml Code (No Block)</button>
+              <button class="btn-main" id="copyPyBtn" type="button" disabled>📋 Copy script.py Code (No Block)</button>
+            </div>
             <div class="btn-grid-three">
-              <button class="btn-sub" id="dlXamlBtn" type="button" disabled>↓ ui.xaml</button>
               <button class="btn-sub" id="dlIconBtn" type="button" disabled>↓ icon.png</button>
-              <button class="btn-sub" id="dlPyBtn" type="button" disabled title="Your exact script with the Groot color theme hook for SelectFromList">↓ script.py (Themed)</button>
+              <button class="btn-sub" id="dlXamlBtn" type="button" disabled>↓ ui.xaml</button>
+              <button class="btn-sub" id="dlPyBtn" type="button" disabled>↓ script.py</button>
             </div>
           </div>
-          <p class="helper-note">Put the downloaded files into your <code>.pushbutton</code> folder. Every step (`Step 1`, `Step 2`, etc.) will appear in Groot colours and advance immediately on click.</p>
+          <p class="helper-note">Using <strong>Copy ui.xaml</strong> &amp; <strong>Copy script.py</strong> and pasting into Notepad/VS Code prevents Windows from adding the "Internet Download" block tag.</p>
         </div>
       </section>
     </main>
   </div>
 
-  <script src="app.js"></script>
   <script>
-    // Self-bootstrapping fallback if app.js was not loaded
-    if (!window.__GROOT_STUDIO_READY__) {
-      const s = document.createElement('script');
-      s.src = 'app.js';
-      document.body.appendChild(s);
+  (function () {
+    const $ = id => document.getElementById(id);
+    const canvas = $('iconCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let generatedXaml = '';
+    let generatedPy = '';
+
+    const patterns = [
+      ['transfer', /(?:view|sheet|viewport).{0,55}(?:transfer|copy|move|duplicate)|(?:transfer|copy|move|duplicate).{0,55}(?:view|sheet|viewport)/gi],
+      ['clash', /clash|interference|collision|conflict|coordination|navisworks|overlap/gi],
+      ['stairs', /stair|riser|tread|stairpath|stair_path|up.?down/gi],
+      ['schedule', /schedule|schedul|tabular|table|takeoff|quantity|qty/gi],
+      ['sheets', /sheet|title.?block|drawing.?list|sheet.?number|viewport|print.?set/gi],
+      ['views', /view|section|elevation|plan.?view|callout|crop.?region|view.?template/gi],
+      ['walls', /wall|floor|ceiling|roof|column|beam|element|host.?object/gi],
+      ['tag', /tag|annotation|text.?note|keynote|callout.?tag/gi],
+      ['dimension', /dimension|spot.?elevation|measure|length.?value/gi],
+      ['level', /level|datum|grid.?line|reference.?plane/gi],
+      ['family', /family|nested|generic.?model|load.?family|parameter.?binding/gi],
+      ['export', /export|publish|save.?as|write.?file|csv|excel|xlsx|pdf|dwg|ifc/gi],
+      ['import', /import|read.?file|load.?data|csv.?reader|excel.?reader|link.?file/gi]
+    ];
+
+    const operationProfiles = {
+      view_transfer: { title: 'Transfer Views / Sheets', art: 'view_transfer' },
+      viewport_place: { title: 'Place Viewport on Sheet', art: 'viewport_place' },
+      view_duplicate: { title: 'Duplicate Revit Views', art: 'view_duplicate' },
+      view_template: { title: 'Copy / Apply View Templates', art: 'view_template' },
+      schedule_create: { title: 'Schedule Export / Creation', art: 'schedule_create' },
+      sheet_create: { title: 'Drawing Sheet Automation', art: 'sheet_create' },
+      stair_path: { title: 'Stair Path Automation', art: 'stair_path' },
+      tag_create: { title: 'Place Tags / Annotations', art: 'tag_create' },
+      dimension_create: { title: 'Dimension Automation', art: 'dimension_create' },
+      clash_detection: { title: 'Clash Detection', art: 'clash_detection' },
+      wall_adjust: { title: 'Element / Section Adjust', art: 'wall_adjust' },
+      element_move: { title: 'Move / Copy Elements', art: 'element_move' },
+      family_instance: { title: 'Family Placement', art: 'family_instance' },
+      export_file: { title: 'Export Revit Data', art: 'export_file' },
+      import_file: { title: 'Import External Data', art: 'import_file' },
+      level_create: { title: 'Level & Datum Management', art: 'level_create' },
+      parameter_update: { title: 'Revit Element Automation', art: 'parameter_update' }
+    };
+
+    function detectOperationKey(source) {
+      const t = String(source || '');
+      const has = re => re.test(t);
+      if (has(/ViewDuplicateOption|\.Duplicate\s*\(/i) && has(/View|view/i)) return 'view_duplicate';
+      if (has(/ViewTemplateId|ViewTemplate|ApplyViewTemplate/i)) return 'view_template';
+      if (has(/(?:ViewSheet|Viewport|View).{0,100}(?:transfer|copy|move|duplicate)|(?:transfer|copy|move|duplicate).{0,100}(?:ViewSheet|Viewport|View)|CopyElements[\s\S]{0,180}(?:View|Sheet)/i)) return 'view_transfer';
+      if (has(/Viewport\.Create|CreateViewport\s*\(/i)) return 'viewport_place';
+      if (has(/Stairs?Path|stair[_\s-]*path|up[_\s-]*down[_\s-]*path/i)) return 'stair_path';
+      if (has(/ScheduleView\.CreateSchedule|CreateSchedule\s*\(|ScheduleSheetInstance\.Create|schedule/i)) return 'schedule_create';
+      if (has(/ViewSheet\.Create|CreateSheet\s*\(/i)) return 'sheet_create';
+      if (has(/IndependentTag\.Create|NewTag\s*\(|RoomTag|Generic\s*Annotation|tag/i)) return 'tag_create';
+      if (has(/NewDimension|Dimension\.Create/i)) return 'dimension_create';
+      if (has(/clash|interference|collision|BooleanOperationsUtils/i)) return 'clash_detection';
+      if (has(/ElementTransformUtils\.MoveElement|Location\.Move/i)) return 'element_move';
+      if (has(/NewFamilyInstance|FamilyInstance|LoadFamily/i)) return 'family_instance';
+      if (has(/Export\s*\(|PrintManager|SaveAs|xlsx|csv/i)) return 'export_file';
+      if (has(/Import\s*\(|Link\s*\(/i)) return 'import_file';
+      if (has(/Level\.Create|NewLevel/i)) return 'level_create';
+
+      const body = t.toLowerCase();
+      const scored = patterns.map(([key, re]) => {
+        re.lastIndex = 0;
+        const m = body.match(re);
+        return { key, score: m ? m.length : 0 };
+      }).sort((a, b) => b.score - a.score);
+
+      const best = scored[0] && scored[0].score > 0 ? scored[0].key : 'gear';
+      const map = {
+        transfer: 'view_transfer', stairs: 'stair_path', schedule: 'schedule_create',
+        sheets: 'sheet_create', views: 'view_template', walls: 'wall_adjust',
+        tag: 'tag_create', dimension: 'dimension_create', family: 'family_instance',
+        export: 'export_file', import: 'import_file', clash: 'clash_detection', level: 'level_create'
+      };
+      return map[best] || 'parameter_update';
     }
+
+    function escapeXml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function extractMatches(text, regex) {
+      const out = [];
+      let m;
+      while ((m = regex.exec(text)) !== null) out.push(m[1]);
+      return out;
+    }
+
+    function processUploadedScript(text, fileName) {
+      let cleanedCode = String(text || '').replace(/# --- GROOT UI START ---[\s\S]*?# --- GROOT UI END ---\r?\n?/g, '');
+      cleanedCode = cleanedCode.replace(/\n# Apply Step 1 Groot UI parameter values[\s\S]*$/g, '');
+      cleanedCode = cleanedCode.replace(/\n_groot_show_final_summary\(\)\s*$/g, '');
+
+      const opKey = detectOperationKey(cleanedCode);
+      const opProfile = operationProfiles[opKey] || operationProfiles.parameter_update;
+
+      const stepTitles = extractMatches(cleanedCode, /title\s*=\s*["']([^"']+)["']/g);
+      const btnNames = extractMatches(cleanedCode, /button_name\s*=\s*["']([^"']+)["']/g);
+
+      const firstStepTitle = stepTitles[0] || opProfile.title;
+      const firstBtnName = btnNames[0] || 'Select & Continue';
+
+      generatedXaml = buildPublicPyRevitSelectFromListXaml(firstStepTitle);
+      generatedPy = buildPublicTwoLineHookPy(cleanedCode);
+
+      $('dropTitle').textContent = '✓ Loaded: ' + fileName;
+      $('dropSub').textContent = 'Ready! Use Copy or Download on the right ->';
+      $('fileNameText').textContent = fileName;
+      $('detectedOpText').textContent = opProfile.title;
+      $('detectedStepsText').textContent = stepTitles.length > 0
+        ? stepTitles.length + ' Step(s) (' + stepTitles.slice(0, 3).join(' -> ') + ')'
+        : 'All SelectFromList steps in script';
+
+      $('previewWindowTitle').textContent = firstStepTitle;
+      $('previewBtnText').textContent = firstBtnName;
+
+      drawIcon(opProfile.art);
+
+      ['copyXamlBtn', 'copyPyBtn', 'dlXamlBtn', 'dlIconBtn', 'dlPyBtn'].forEach(id => {
+        $(id).disabled = false;
+      });
+    }
+
+    // 100% Standard Public pyRevit SelectFromList.xaml Template with Groot Colours
+    function buildPublicPyRevitSelectFromListXaml(title) {
+      const safeTitle = escapeXml(title);
+      return `<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="${safeTitle}"
+        Width="460" Height="500"
+        MinWidth="360" MinHeight="340"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResizeWithGrip"
+        Background="#3B261A"
+        Foreground="#F0D2A6"
+        FontFamily="Segoe UI"
+        PreviewKeyDown="handle_input_key">
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="#F0D2A6"/>
+        </Style>
+
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="#6F9E4D"/>
+            <Setter Property="Foreground" Value="#140D09"/>
+            <Setter Property="BorderBrush" Value="#D2A16B"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="ClearButton" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="#24160F"/>
+            <Setter Property="Foreground" Value="#D2A16B"/>
+            <Setter Property="BorderBrush" Value="#8B5A35"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="#24160F"/>
+            <Setter Property="Foreground" Value="#F0D2A6"/>
+            <Setter Property="CaretBrush" Value="#D2A16B"/>
+            <Setter Property="BorderBrush" Value="#8B5A35"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+        </Style>
+
+        <Style TargetType="{x:Type ListBox}">
+            <Setter Property="Background" Value="#24160F"/>
+            <Setter Property="Foreground" Value="#F0D2A6"/>
+            <Setter Property="BorderBrush" Value="#8B5A35"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
+            <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+        </Style>
+
+        <Style TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="#F0D2A6"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="12" Background="#3B261A">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <ToggleButton x:Name="regexToggle_b" DockPanel.Dock="Left"
+                          Width="30" Height="28" Margin="0,0,6,0"
+                          Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                          ToolTip="Toggle Regex / Filter Mode" Click="toggle_regex">
+                <TextBlock Text="A-Z" FontSize="10" FontWeight="Bold" Foreground="#D2A16B"/>
+            </ToggleButton>
+            <Grid>
+                <TextBox x:Name="search_tb" Height="28" VerticalContentAlignment="Center"/>
+                <Button x:Name="clrsearch_b" Visibility="Collapsed"
+                        HorizontalAlignment="Right" Width="22" Height="22" Margin="0,0,3,0"
+                        Content="x" Style="{StaticResource ClearButton}" Click="clear_search"/>
+            </Grid>
+        </DockPanel>
+
+        <DockPanel x:Name="ctx_groups_dock" DockPanel.Dock="Top" Margin="0,0,0,10" Visibility="Collapsed">
+            <TextBlock x:Name="ctx_groups_title_tb" DockPanel.Dock="Left"
+                       VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#D2A16B" Text="List Group:"/>
+            <ComboBox x:Name="ctx_groups_selector_cb" Height="26" Background="#24160F" Foreground="#F0D2A6" BorderBrush="#8B5A35"/>
+        </DockPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <Grid x:Name="checkboxbuttons_g" Margin="0,0,0,8" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="checkall_b" Grid.Column="0" Height="26" Margin="0,0,4,0"
+                        Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                        Content="Check" Click="button_checkall"/>
+                <Button x:Name="uncheckall_b" Grid.Column="1" Height="26" Margin="2,0,2,0"
+                        Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                        Content="Uncheck" Click="button_uncheckall"/>
+                <Button x:Name="toggleall_b" Grid.Column="2" Height="26" Margin="4,0,0,0"
+                        Background="#24160F" Foreground="#D2A16B" BorderBrush="#8B5A35"
+                        Content="Toggle" Click="button_toggleall"/>
+            </Grid>
+            <Button x:Name="select_b" Content="Select" Height="32"
+                    Background="#6F9E4D" Foreground="#140D09" BorderBrush="#D2A16B"
+                    FontWeight="Bold" IsDefault="True" Click="button_select"/>
+        </StackPanel>
+
+        <ListBox x:Name="list_lb" BorderBrush="#8B5A35" BorderThickness="1" Background="#24160F" Foreground="#F0D2A6">
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Foreground" Value="#F0D2A6"/>
+                    <Setter Property="Padding" Value="6,4"/>
+                </Style>
+                <DataTemplate x:Key="DefaultItemTemplate">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox Content="{Binding name}" IsChecked="{Binding state}"
+                                  Foreground="#F0D2A6" VerticalAlignment="Center" Click="check_selected"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.Resources>
+        </ListBox>
+    </DockPanel>
+</Window>`;
+    }
+
+    // Uses ONLY 2 lines of 100% public pyRevit API (Zero clr.AddReference, zero monkey-patching)
+    function buildPublicTwoLineHookPy(cleanedCode) {
+      const lines = cleanedCode.split(/\r?\n/);
+      let insertIdx = 0;
+      let inDocstring = false;
+      let docDelim = '';
+
+      for (let i = 0; i < lines.length; i++) {
+        const trimmed = lines[i].trim();
+        if (inDocstring) {
+          if (trimmed.includes(docDelim)) inDocstring = false;
+          insertIdx = i + 1;
+          continue;
+        }
+        if (i <= 5 && (trimmed.startsWith('"""') || trimmed.startsWith("'''"))) {
+          docDelim = trimmed.slice(0, 3);
+          if (!trimmed.slice(3).includes(docDelim)) inDocstring = true;
+          insertIdx = i + 1;
+          continue;
+        }
+        if (
+          trimmed === '' ||
+          trimmed.startsWith('#') ||
+          trimmed.startsWith('from __future__') ||
+          /^__[a-zA-Z0-9_]+__\s*=/.test(trimmed)
+        ) {
+          insertIdx = i + 1;
+        } else {
+          break;
+        }
+      }
+
+      const publicHook = [
+        '# --- GROOT UI START ---',
+        'from pyrevit import forms as _groot_forms, script as _groot_script',
+        '_groot_forms.SelectFromList.xaml_source = _groot_script.get_bundle_file("ui.xaml")',
+        '# --- GROOT UI END ---'
+      ].join('\n');
+
+      const topPart = lines.slice(0, insertIdx).join('\n');
+      const bottomPart = lines.slice(insertIdx).join('\n');
+
+      return (topPart ? topPart + '\n\n' : '') + publicHook + '\n\n' + bottomPart + '\n';
+    }
+
+    function rr(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawIcon(art) {
+      const dark = '#3B261A', bark = '#8B5A35', tan = '#D2A16B', green = '#6F9E4D', cream = '#F0D2A6';
+      ctx.clearRect(0, 0, 96, 96);
+
+      const bg = ctx.createLinearGradient(4, 4, 91, 93);
+      bg.addColorStop(0, '#8B5A35');
+      bg.addColorStop(0.42, '#684027');
+      bg.addColorStop(1, '#2B1B12');
+      rr(2.5, 2.5, 91, 91, 21);
+      ctx.fillStyle = bg;
+      ctx.fill();
+
+      ctx.strokeStyle = '#D2A16B88';
+      ctx.lineWidth = 1.2;
+      rr(4, 4, 88, 88, 18);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const poly = (pts, fill, stroke = cream, width = 1.5) => {
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+        ctx.closePath();
+        if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = width; ctx.stroke(); }
+      };
+      const strokePath = (pts, color = cream, width = 2.4) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+        ctx.stroke();
+      };
+      const rounded = (x, y, w, h, r, fill, stroke = cream, lw = 1.5) => {
+        rr(x, y, w, h, r);
+        if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+      };
+      const curveArrow = (pts, color = green, w = 2.8) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = w;
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        ctx.bezierCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1], pts[3][0], pts[3][1]);
+        ctx.stroke();
+        const a = Math.atan2(pts[3][1] - pts[2][1], pts[3][0] - pts[2][0]), l = 6;
+        strokePath([[pts[3][0] - l * Math.cos(a - 0.55), pts[3][1] - l * Math.sin(a - 0.55)], [pts[3][0], pts[3][1]], [pts[3][0] - l * Math.cos(a + 0.55), pts[3][1] - l * Math.sin(a + 0.55)]], color, w);
+      };
+      const isoBlock = (cx, cy, w, h, depth, top = cream, left = bark, right = dark) => {
+        poly([[cx - w / 2, cy - h / 4], [cx, cy], [cx, cy + depth], [cx - w / 2, cy - h / 4 + depth]], left, cream, 1.3);
+        poly([[cx, cy], [cx + w / 2, cy - h / 4], [cx + w / 2, cy - h / 4 + depth], [cx, cy + depth]], right, cream, 1.3);
+        poly([[cx, cy - h / 2], [cx + w / 2, cy - h / 4], [cx, cy], [cx - w / 2, cy - h / 4]], top, cream, 1.4);
+      };
+      const paper = (x, y, w, h, accented = false) => {
+        rounded(x, y, w, h, 3, '#6E452C', cream, 1.3);
+        rounded(x + 5, y + 14, w - 10, h - 22, 2, accented ? '#6F9E4D33' : '#3B261A88', accented ? green : tan, 1.3);
+      };
+
+      switch (art) {
+        case 'view_transfer':
+        case 'viewport_place':
+        case 'view_duplicate':
+          paper(10, 22, 32, 50, false);
+          paper(54, 18, 32, 50, true);
+          curveArrow([[34, 30], [44, 14], [56, 14], [62, 24]], green, 3);
+          break;
+        case 'view_template':
+          paper(10, 24, 36, 50, false);
+          rounded(54, 18, 30, 56, 5, '#4B2D1C', green, 1.5);
+          strokePath([[60, 32], [78, 32]], tan, 2);
+          strokePath([[60, 45], [78, 45]], green, 2.5);
+          strokePath([[60, 58], [78, 58]], tan, 2);
+          curveArrow([[42, 48], [48, 36], [52, 36], [56, 42]], green, 2.6);
+          break;
+        case 'schedule_create':
+          isoBlock(24, 44, 24, 24, 20);
+          rounded(54, 24, 32, 48, 4, '#4B2E1D', tan, 1.5);
+          rounded(58, 29, 24, 8, 1, green, green, 1);
+          strokePath([[58, 45], [82, 45]], tan, 1.2);
+          strokePath([[58, 55], [82, 55]], tan, 1.2);
+          curveArrow([[38, 38], [45, 24], [52, 24], [56, 32]], green, 2.6);
+          break;
+        case 'stair_path':
+          poly([[12,72],[24,72],[24,60],[36,60],[36,48],[48,48],[48,36],[60,36],[60,24],[78,24],[78,34],[66,34],[66,46],[54,46],[54,58],[42,58],[42,70],[30,70],[30,80],[12,80]], bark, tan, 1.2);
+          strokePath([[16,68],[28,68],[28,56],[40,56],[40,44],[52,44],[52,32],[72,32]], green, 3.5);
+          break;
+        case 'tag_create':
+          isoBlock(30, 48, 32, 28, 22);
+          strokePath([[38, 42], [54, 26], [62, 26]], green, 2.2);
+          rounded(60, 16, 26, 20, 3, dark, green, 1.6);
+          break;
+        default:
+          isoBlock(28, 44, 32, 30, 26);
+          rounded(54, 18, 32, 58, 5, '#4B2D1C', tan, 1.4);
+          rounded(60, 34, 20, 6, 2, green, null, 0);
+          rounded(60, 46, 15, 6, 2, bark, null, 0);
+          rounded(60, 58, 20, 6, 2, green, null, 0);
+          curveArrow([[42, 44], [48, 34], [52, 36], [56, 42]], green, 2.6);
+      }
+      ctx.restore();
+    }
+
+    function downloadFile(filename, content, mime = 'text/plain;charset=utf-8') {
+      const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function readSelectedFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => processUploadedScript(String(reader.result || ''), file.name);
+      reader.readAsText(file);
+    }
+
+    const fileInput = $('fileInput');
+    fileInput.addEventListener('click', e => {
+      e.stopPropagation();
+      fileInput.value = '';
+    });
+    fileInput.addEventListener('change', e => {
+      if (e.target.files && e.target.files[0]) readSelectedFile(e.target.files[0]);
+    });
+
+    const dropzone = $('dropzone');
+    ['dragenter', 'dragover'].forEach(ev => dropzone.addEventListener(ev, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('drag');
+    }));
+    ['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('drag');
+    }));
+    dropzone.addEventListener('drop', e => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        readSelectedFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // Copy Buttons (Zero Windows Mark-of-the-Web)
+    $('copyXamlBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(generatedXaml);
+      $('copyXamlBtn').textContent = '✓ Copied ui.xaml!';
+      setTimeout(() => { $('copyXamlBtn').textContent = '📋 Copy ui.xaml Code (No Block)'; }, 1800);
+    });
+
+    $('copyPyBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(generatedPy);
+      $('copyPyBtn').textContent = '✓ Copied script.py!';
+      setTimeout(() => { $('copyPyBtn').textContent = '📋 Copy script.py Code (No Block)'; }, 1800);
+    });
+
+    // Direct Download Buttons
+    $('dlXamlBtn').addEventListener('click', () => downloadFile('ui.xaml', generatedXaml));
+    $('dlPyBtn').addEventListener('click', () => downloadFile('script.py', generatedPy));
+    $('dlIconBtn').addEventListener('click', () => {
+      canvas.toBlob(blob => downloadFile('icon.png', blob, 'image/png'), 'image/png');
+    });
+
+    $('dlHtmlBtn').addEventListener('click', () => {
+      downloadFile('index.html', '<!doctype html>\n' + document.documentElement.outerHTML, 'text/html');
+    });
+
+    drawIcon('tag_create');
+  })();
   </script>
 </body>
 </html>
